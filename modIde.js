@@ -3,6 +3,7 @@
     
     var g_iterations = 100;
     var g_stopPlay100;
+    var g_inIde = false;
 
     chrome.storage.sync.get({ iterations: 100 }, (items) => {
         g_iterations = items.iterations;
@@ -16,7 +17,17 @@
         }
     });
     
-    $(document).on('DOMNodeInserted', checkForAgentPanel);
+    setInterval(checkForIde, 200);
+
+    function checkForIde() {
+        if (window.location.href.startsWith('https://www.codingame.com/ide/')) {
+            if (!g_inIde) $(document).on('DOMNodeInserted', checkForAgentPanel);
+            g_inIde = true;
+        } else {
+            g_inIde = false;
+        }
+    }
+
         
     function checkForAgentPanel(event) {
         if ($(event.target).is('.cg-ide-agents-management') && 
