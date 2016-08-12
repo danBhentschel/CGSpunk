@@ -1,0 +1,22 @@
+{
+  "appName": {
+    "message": "CG Spunk",
+    "description": "The name of the application"
+  },
+  "appDescription": {
+    "message": "A Chrome extension to enhance the CodinGame experience",
+    "description": "The description of the application"
+  },
+  "btnSwapAgents": {
+    "message": "SWAP",
+    "description": "Button to switch the order of AI agents"
+  },
+  "btnBatchRun": {
+    "message": "BATCH_RUN",
+    "description": "Button to run matches and record results"
+  },
+  "btnStopBatch": {
+    "message": "STOP",
+    "description": "Button to stop a batch run in progress"
+  }
+}
