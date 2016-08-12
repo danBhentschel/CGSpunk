@@ -1,3 +1,7 @@
+## Chrome Web Store link
+
+[https://chrome.google.com/webstore/detail/cg-spunk/bkmddelokmckldmgeeiheohknodgaphi](https://chrome.google.com/webstore/detail/cg-spunk/bkmddelokmckldmgeeiheohknodgaphi)
+
 ## Setting up for development
 
 In the root directory of the repository:
