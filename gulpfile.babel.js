@@ -12,6 +12,9 @@ gulp.task('extras', () => {
   return gulp.src([
     'app/*.*',
     'app/_locales/**',
+    'app/bower_components/bootstrap/dist/css/bootstrap.min.css',
+    'app/bower_components/bootstrap/dist/js/bootstrap.min.js',
+    'app/scripts/*Dialog.js',
     '!app/*.json',
     '!app/**/*.html',
   ], {
