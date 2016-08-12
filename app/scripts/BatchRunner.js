@@ -3,6 +3,7 @@ var BatchRunner =
 
     function runBatch(params) {
         dom.toggleBatchButtons();
+        chrome.runtime.sendMessage({ action: 'showResultsWindow' });
 
         let context = {
             params: params,
@@ -25,7 +26,7 @@ var BatchRunner =
         dom.clickPlayButton();
         dom.getResultsOfRun().then(results => {
             context.results = recorder.recordMatch(results, context.results);
-            reporter.reportMatch(results, context.results);
+            reporter.reportMatch(results, context.results, context.params.iterations);
             context.iteration++;
             doIteration(context);
         });

@@ -34,8 +34,10 @@ var IdeActions =
     }
 
     function batchRun() {
-        let params = options.getRunParameters();
-        g_runContext = runner.runBatch(params);
+        options.getRunParameters()
+            .then(params => {
+                g_runContext = runner.runBatch(params);
+            });
     }
 
     function stopBatch() {

@@ -3,9 +3,9 @@ var BatchRunOptions =
     'use strict';
 
     function getRunParameters() {
-        return {
-            iterations: 3
-        };
+        return new Promise(resolve => {
+            chrome.runtime.sendMessage({ action: 'getBatchRunOptions' }, options => resolve(options));
+        });
     }
 
     return new function() {

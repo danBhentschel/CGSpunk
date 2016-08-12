@@ -12,10 +12,12 @@
   "default_locale": "en",
   "background": {
     "scripts": [
+      "scripts/background.js",
       "scripts/chromereload.js"
     ]
   },
   "permissions": [
+      "storage"
   ],
   "content_scripts": [
     {
