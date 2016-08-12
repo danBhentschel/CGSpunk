@@ -3,6 +3,7 @@
 In the root directory of the repository:
 
 `npm install`
+
 `bower install`
 
 
