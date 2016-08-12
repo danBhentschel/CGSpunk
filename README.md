@@ -2,22 +2,22 @@
 
 In the root directory of the repository:
 
-`npm install`
+`> npm install`
 
-`bower install`
+`> bower install`
 
 
 ## While editing
 
 1. Load the **app** directory as an unpacked extension: https://developer.chrome.com/extensions/getstarted#unpacked
 
-2. Run `gulp debug`
+2. Run `> gulp debug`
 
 
 ## Building
 
-`gulp build`
+`> gulp build`
 
 To make a zip file:
 
-`gulp package`
+`> gulp package`
