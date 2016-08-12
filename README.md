@@ -11,7 +11,7 @@ In the root directory of the repository:
 
 1. Load the **app** directory as an unpacked extension: https://developer.chrome.com/extensions/getstarted#unpacked
 
-2. Run `> gulp debug`
+2. Run `> gulp watch`
 
 
 ## Building
