@@ -13,7 +13,7 @@ gulp.task('extras', () => {
     'app/*.*',
     'app/_locales/**',
     '!app/*.json',
-    '!app/*.html',
+    '!app/**/*.html',
   ], {
     base: 'app',
     dot: true
@@ -51,7 +51,7 @@ gulp.task('images', () => {
 });
 
 gulp.task('html',  () => {
-  return gulp.src('app/*.html')
+  return gulp.src('app/**/*.html')
     .pipe($.useref({searchPath: ['.tmp', 'app', '.']}))
     .pipe($.sourcemaps.init())
     // uglify doesn't seem to support ES6 syntax (arrow functions)
@@ -87,7 +87,7 @@ gulp.task('watch', ['lint', 'html'], () => {
   $.livereload.listen();
 
   gulp.watch([
-    'app/*.html',
+    'app/**/*.html',
     'app/scripts/**/*.js',
     'app/images/**/*',
     'app/styles/**/*',
@@ -103,7 +103,7 @@ gulp.task('size', () => {
 });
 
 gulp.task('wiredep', () => {
-  gulp.src('app/*.html')
+  gulp.src('app/**/*.html')
     .pipe(wiredep({
       ignorePath: /^(\.\.\/)*\.\./
     }))
