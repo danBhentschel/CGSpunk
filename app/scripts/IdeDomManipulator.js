@@ -227,7 +227,8 @@ var IdeDomManipulator =
             rankings: [],
             options: getMatchOptions(),
             stderr: getMatchStderr(),
-            crash: getCrashInfo()
+            crash: getCrashInfo(),
+	    replay: getReplayUrl()
         };
 
         rankedNames.each(function() {
@@ -266,6 +267,12 @@ var IdeDomManipulator =
         let next = $('.errorLink.in-answer').text().trim();
         if (next) info += '\n' + next;
         return info;
+    }
+
+    function getReplayUrl() {
+        let href = $('.replay-button').attr('href');
+	if (href.startsWith('/replay')) href = 'http://www.codingame.com' + href;
+	return href;
     }
 
     return new function() {

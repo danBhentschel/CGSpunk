@@ -29,7 +29,7 @@ function populateHeaders(rankings) {
         $('#summary').append('<h3>' + name + ': <span id="wins' + i + '">0</span></h3>');
     }
 
-    header += '<th>Crash</th><th>Options</th><th>STDERR</th></tr>';
+    header += '<th>Crash</th><th>Options</th><th>STDERR</th><th>Replay</th></tr>';
 
     $('#resultsTableHead').append(header);
     $('#summary').append('<h3>Ties: <span id="ties">0</span></h3>');
@@ -45,10 +45,11 @@ function addRowToTable(match) {
     }
 
     row += '<td>' + (match.crash
-               ? '<button type="button" class="btn btn-danger" id="crashBtn' + runs + '">X</button>'
+               ? '<button type="button" class="btn btn-danger" id="crashBtn' + runs + '"><span class="glyphicon glyphicon-exclamation-sign"></span></button>'
                : '') + '</td>';
     row += '<td><button type="button" class="btn btn-default" id="optionsBtn' + runs + '">See options</button></td>';
     row += '<td><button type="button" class="btn btn-default" id="stderrBtn' + runs + '">See STDERR</button></td>';
+    row += '<td><button type="button" class="btn btn-default" id="replayBtn' + runs + '"><span class="glyphicon glyphicon-share-alt"></span></button></td>';
     row += '</tr>';
 
     let tbody = $('#resultsTable tbody');
@@ -76,6 +77,10 @@ function addRowToTable(match) {
             action: 'showMatchStderr',
             stderr: match.stderr
         });
+    });
+
+    tbody.on('click', '#replayBtn' + runs, () => {
+	window.open(match.replay);
     });
 }
 
