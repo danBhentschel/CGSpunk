@@ -29,7 +29,7 @@ function populateHeaders(rankings) {
         $('#summary').append('<h3>' + name + ': <span id="wins' + i + '">0</span></h3>');
     }
 
-    header += '<th>Options</th><th>STDERR</th></tr>';
+    header += '<th>Crash</th><th>Options</th><th>STDERR</th></tr>';
 
     $('#resultsTableHead').append(header);
     $('#summary').append('<h3>Ties: <span id="ties">0</span></h3>');
@@ -44,9 +44,9 @@ function addRowToTable(match) {
         row += '<td>' + entry.rank + '</td>';
     }
 
+    row += '<td>' + (match.crash ? 'X' : '') + '</td>';
     row += '<td><button type="button" class="btn btn-default" id="optionsBtn' + runs + '">See options</button></td>';
     row += '<td><button type="button" class="btn btn-default" id="stderrBtn' + runs + '">See STDERR</button></td>';
-
     row += '</tr>';
 
     let tbody = $('#resultsTable tbody');

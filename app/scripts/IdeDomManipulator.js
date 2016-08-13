@@ -226,7 +226,8 @@ var IdeDomManipulator =
         let results = {
             rankings: [],
             options: getMatchOptions(),
-            stderr: getMatchStderr()
+            stderr: getMatchStderr(),
+            crash: getCrashInfo()
         };
 
         rankedNames.each(function() {
@@ -257,6 +258,10 @@ var IdeDomManipulator =
 
     function getRank(nameObj) {
         return parseInt(nameObj.closest('.leaderboard-item').find('.rank-value').eq(0).text(), 10);
+    }
+
+    function getCrashInfo() {
+        return $('.error > .consoleError').text();
     }
 
     return new function() {

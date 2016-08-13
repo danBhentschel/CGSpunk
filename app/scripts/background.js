@@ -35,7 +35,7 @@ function showResultsWindow() {
     chrome.windows.create({
         url: 'dialogs/batchRunResults.html',
         type: 'popup',
-        width: 600,
+        width: 700,
         height: 600
     });
 }
