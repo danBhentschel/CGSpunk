@@ -261,7 +261,11 @@ var IdeDomManipulator =
     }
 
     function getCrashInfo() {
-        return $('.error > .consoleError').text();
+        let info = $('.error > .consoleError').text();
+        if (!info) return '';
+        let next = $('.errorLink.in-answer').text().trim();
+        if (next) info += '\n' + next;
+        return info;
     }
 
     return new function() {

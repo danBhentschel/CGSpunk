@@ -44,7 +44,9 @@ function addRowToTable(match) {
         row += '<td>' + entry.rank + '</td>';
     }
 
-    row += '<td>' + (match.crash ? 'X' : '') + '</td>';
+    row += '<td>' + (match.crash
+               ? '<button type="button" class="btn btn-danger" id="crashBtn' + runs + '">X</button>'
+               : '') + '</td>';
     row += '<td><button type="button" class="btn btn-default" id="optionsBtn' + runs + '">See options</button></td>';
     row += '<td><button type="button" class="btn btn-default" id="stderrBtn' + runs + '">See STDERR</button></td>';
     row += '</tr>';
@@ -53,12 +55,22 @@ function addRowToTable(match) {
 
     tbody.append(row);
 
+    if (match.crash) {
+        tbody.on('click', '#crashBtn' + runs, () => {
+            chrome.runtime.sendMessage({
+                action: 'showMatchCrashInfo',
+                crashInfo: match.crash
+            });
+        });
+    }
+
     tbody.on('click', '#optionsBtn' + runs, () => {
         chrome.runtime.sendMessage({
             action: 'showMatchOptions',
             options: match.options
         });
     });
+
     tbody.on('click', '#stderrBtn' + runs, () => {
         chrome.runtime.sendMessage({
             action: 'showMatchStderr',
