@@ -1,36 +1,21 @@
 var IdeActions =
-(function(dom, options, runner) {
+(function(options, runner) {
     'use strict';
 
     var g_runContext;
 
     function rotateAgents() {
-        dom.getAgentNames()
-            .then(deleteEachAgent)
-            .then(shiftAgentNames)
-            .then(addEachAgent);
-    }
+        return new Promise(resolve => {
+            let responseFunc = (event) => {
+                let data = event.data;
+                if (data.action !== 'rotateAgentsComplete') return;
+                window.removeEventListener('message', responseFunc, false);
+                resolve();
+            };
+            window.addEventListener('message', responseFunc, false);
 
-    function deleteEachAgent(agentNames) {
-        let promise = dom.deleteAgent(agentNames[0]);
-        for (let i = 1; i < agentNames.length; i++)
-            promise = promise.then(() => dom.deleteAgent(agentNames[i]));
-
-        return promise.then(() => agentNames);
-    }
-
-    function addEachAgent(agentNames) {
-        let promise = dom.addAgent(agentNames[0]);
-        for (let i = 1; i < agentNames.length; i++)
-            promise = promise.then(() => dom.addAgent(agentNames[i]));
-
-        return promise.then(() => agentNames);
-    }
-
-    function shiftAgentNames(agentNames) {
-        let shifted = agentNames.slice();
-        shifted.push(shifted.shift());
-        return shifted;
+            window.postMessage({action:'rotateAgents'}, '*');
+        });
     }
 
     function batchRun() {
@@ -51,4 +36,4 @@ var IdeActions =
         actions.batchRun = batchRun;
         actions.stopBatch = stopBatch;
     };
-})(IdeDomManipulator, BatchRunOptions, BatchRunner);
+})(BatchRunOptions, BatchRunner);

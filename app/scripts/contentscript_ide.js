@@ -12,7 +12,7 @@
 
     function checkForIde() {
         if (window.location.href.startsWith('https://www.codingame.com/ide/')) {
-            if (!g_inIde) { $(document).on('DOMNodeInserted', checkForAgentPanel); console.log('Detected IDE'); }
+            if (!g_inIde) { $(document).on('DOMNodeInserted', checkForAgentPanel); }
             g_inIde = true;
         } else {
             g_inIde = false;
@@ -22,12 +22,22 @@
     function checkForAgentPanel(event) {
         if ($(event.target).is('.cg-ide-agents-management') && 
             $('.cg-ide-agents-management > .scroll-panel').length) {
-console.log('Detected agents panel');
+
             $(document).off('DOMNodeInserted', checkForAgentPanel);
+
             dom.createSwapButton(actions.rotateAgents);
             dom.createBatchButton(actions.batchRun);
             dom.createStopButton(actions.stopBatch);
         }
     }
+
+    function injectScript() {
+        let script = document.createElement('script');
+        script.src = chrome.extension.getURL('scripts/Injected.js');
+        let html = document.getElementsByTagName('html')[0];
+        html.appendChild(script);
+    }
+
+    injectScript();
 
 })(IdeDomManipulator, IdeActions);

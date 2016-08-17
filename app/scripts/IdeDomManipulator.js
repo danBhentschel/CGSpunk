@@ -51,39 +51,6 @@ var IdeDomManipulator =
     }
 
     // public
-    function getAgentNames() {
-        return new Promise(resolve => {
-            resolve($('.agent').map(function() {
-                    return $(this).find('.nickname').text();
-                }).get());
-        });
-    }
-
-    // public
-    function deleteAgent(name) {
-        return new Promise(resolve => {
-            $('.agent')
-                .find('.nickname:contains("' + name + '")')
-                .closest('.agent')
-                .find('.delete-button')
-                .click();
-
-            resolve();
-        });
-    }
-
-    // public
-    function addAgent(name) {
-        return new Promise(resolve => {
-            clickAddPlayerSquare()
-                .then(getAgentSelectionSearchBox)
-                .then(searchBox => searchForName(searchBox, name))
-                .then(() => clickAddButton(name))
-                .then(resolve);
-        });
-    }
-
-    // public
     function toggleBatchButtons() {
         return new Promise(resolve => {
             if ($('#cgspkStopBatchButton').is(':visible')) {
@@ -114,75 +81,6 @@ var IdeDomManipulator =
     }
 
     // ***************** All private after here ****************
-
-    function clickAddPlayerSquare() {
-        return getAddPlayerSquare()
-            .then(square => square.click());
-    }
-
-    function getAddPlayerSquare() {
-        return new Promise(resolve => {
-            let tryFind = () => {
-                let square = $('.add-player-square').eq(0);
-                if (square.length) {
-                    resolve(square);
-                } else {
-                    setTimeout(tryFind, 200);
-                }
-            };
-
-            setTimeout(tryFind, 200);
-        });
-    }
-
-    function getAgentSelectionSearchBox() {
-        return new Promise(resolve => {
-            let tryFind = () => {
-                let searchBox = $('.field');
-                if (searchBox.length && searchBox.closest('.searchfield').length) {
-                    resolve(searchBox);
-                } else {
-                    setTimeout(tryFind, 200);
-                }
-            };
-
-            setTimeout(tryFind, 200);
-        });
-    }
-
-    function searchForName(searchBox, name) {
-        searchBox.val(name);
-        searchBox[0].focus();
-        utils.pressEnter(searchBox[0]);
-
-        return waitForAgentAddCardVisible(name);
-    }
-
-    function waitForAgentAddCardVisible(name) {
-        return new Promise(resolve => {
-            let tryFind = () => {
-                if (isAgentAddCardVisible(name)) {
-                    resolve();
-                } else {
-                    setTimeout(tryFind, 200);
-                }
-            };
-
-            setTimeout(tryFind, 200);
-        });
-    }
-
-    function isAgentAddCardVisible(name) {
-        return $('.player-add-card').find('.agent-card-nickname:contains("' + name + '")').length > 0;
-    }
-
-    function clickAddButton(name) {
-        $('.player-add-card')
-            .find('.agent-card-nickname:contains("' + name + '")')
-            .closest('.player-add-card')
-            .find('.add-agent-button')
-            .click();
-    }
 
     function waitForResults(resolve) {
         let rankedNames = $('.cg-ide-mini-leaderboard').find('.nickname');
@@ -283,11 +181,6 @@ var IdeDomManipulator =
         manipulator.createBatchButton = createBatchButton;
         manipulator.createStopButton = createStopButton;
         manipulator.toggleBatchButtons = toggleBatchButtons;
-
-        // Agent methods
-        manipulator.getAgentNames = getAgentNames;
-        manipulator.deleteAgent = deleteAgent;
-        manipulator.addAgent = addAgent;
 
         // Batch methods
         manipulator.clickPlayButton = clickPlayButton;
