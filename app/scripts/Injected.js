@@ -5,6 +5,8 @@
         let data = event.data;
         if (data.action === 'rotateAgents') rotateAgents();
         if (data.action === 'setGameOptionsManual') setGameOptionsManual(data.value);
+        if (data.action === 'playMatch') playMatch();
+        if (data.action === 'stopPlayback') stopPlayback();
     }, false);
 
     function rotateAgents() {
@@ -32,7 +34,7 @@
         if (found === name) {
             window.postMessage({action:'rotateAgentsComplete'}, '*');
         } else {
-            setTimeout(() => { checkForAgentsAdded(name, index); }, 10);
+            setTimeout(() => checkForAgentsAdded(name, index), 10);
         }
     }
 
@@ -48,8 +50,76 @@
         if (angular.element('.options-text').prop('readonly') !== value) {
             window.postMessage({action:'setGameOptionsManualComplete'}, '*');
         } else {
-            setTimeout(() => { checkForGameOptionsManual(value); }, 10);
+            setTimeout(() => checkForGameOptionsManual(value), 10);
         }
+    }
+
+    function stopPlayback() {
+        waitForGameManager()
+            .then(pausePlayback)
+            .then(() => waitForPlayback(false))
+            .then(() => window.postMessage({action:'stopPlaybackComplete'}, '*'));
+    }
+
+    function waitForGameManager() {
+        return new Promise(resolve => doWaitForGameManager(resolve));
+    }
+
+    function doWaitForGameManager(resolve) {
+        let gameManager = angular.element('.play-pause-button').scope().gameManager;
+        if (angular.isDefined(gameManager) && gameManager !== null) {
+            resolve();
+        } else {
+            setTimeout(() => doWaitForGameManager(resolve), 10);
+        }
+    }
+
+    function waitForPlayback(value) {
+        return new Promise(resolve => doWaitForPlaybackRunningToBe(value, resolve));
+    }
+
+    function doWaitForPlaybackRunningToBe(value, resolve) {
+        let gameManager = angular.element('.play-pause-button').scope().gameManager;
+        if (angular.isDefined(gameManager) && gameManager !== null && gameManager.playing === value) {
+            resolve();
+        } else {
+            setTimeout(() => doWaitForPlaybackRunningToBe(value, resolve), 10);
+        }
+    }
+
+    function pausePlayback() {
+        return new Promise(resolve => setTimeout(() => {
+                angular.element('.play-pause-button').scope().gameManager.pause();
+                resolve();
+            }, 100));
+    }
+
+    function playMatch() {
+        waitForPlayInProgress(false)
+            .then(startPlay)
+            .then(() => waitForPlayInProgress(true))
+            .then(() => waitForPlayInProgress(false))
+            .then(() => window.postMessage({action:'playMatchComplete'}, '*'));
+    }
+
+    function waitForPlayInProgress(value) {
+        return new Promise(resolve => doWaitForPlayInProgress(value, resolve));
+    }
+
+    function doWaitForPlayInProgress(value, resolve) {
+        if (playIsInProgress() === value) {
+            resolve();
+        } else {
+            setTimeout(() => doWaitForPlayInProgress(value, resolve), 10);
+        }
+    }
+
+    function startPlay() {
+        angular.element('.play').scope().api.play()
+    }
+
+    function playIsInProgress() {
+        return angular.element('.play').scope().api.playInProgress;
     }
 
     if (!angular.isDefined(angular.element('#content').scope()))
