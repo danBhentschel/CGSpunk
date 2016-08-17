@@ -38,6 +38,10 @@
         html.appendChild(script);
     }
 
+    chrome.runtime.onMessage.addListener(request => {
+        if (request.action === 'sendToIde') actions.sendToIde(request);
+    });
+
     injectScript();
 
 })(IdeDomManipulator, IdeActions);

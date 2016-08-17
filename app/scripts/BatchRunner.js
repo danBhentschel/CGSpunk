@@ -3,7 +3,7 @@ var BatchRunner =
 
     function runBatch(params, ideActions) {
         dom.toggleBatchButtons();
-        chrome.runtime.sendMessage({ action: 'showResultsWindow' });
+        chrome.runtime.sendMessage({action:'showResultsWindow'});
 
         let context = {
             params: params,
@@ -27,11 +27,20 @@ var BatchRunner =
 
         context.ideActions.playMatch()
             .then(context.ideActions.stopPlayback)
-            .then(dom.getResultsOfRun)
+            .then(dom.getResultsOfMatch)
+            .then(results => addAgentsInfoToResults(context.ideActions, results))
             .then(results => {
                 context.results = recorder.recordMatch(results, context.results);
                 reporter.reportMatch(results, context.results, context.params);
                 doNextIteration(context);
+            });
+    }
+
+    function addAgentsInfoToResults(ideActions, results) {
+        return ideActions.getAgentsData()
+            .then(agents => {
+                results.agents = agents;
+                return results;
             });
     }
 

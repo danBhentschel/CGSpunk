@@ -74,7 +74,7 @@ var IdeDomManipulator =
     }
 
     // public
-    function getResultsOfRun() {
+    function getResultsOfMatch() {
         return new Promise(resolve => {
             waitForResults(resolve);
         });
@@ -154,6 +154,6 @@ var IdeDomManipulator =
 
         // Batch methods
         manipulator.clickPlayButton = clickPlayButton;
-        manipulator.getResultsOfRun = getResultsOfRun;
+        manipulator.getResultsOfMatch = getResultsOfMatch;
     };
 })(DomUtils);

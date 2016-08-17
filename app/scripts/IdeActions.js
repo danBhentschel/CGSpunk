@@ -12,7 +12,7 @@ var IdeActions =
                 let data = event.data;
                 if (data.action !== actionComplete) return;
                 window.removeEventListener('message', responseFunc, false);
-                resolve();
+                resolve(data.result);
             };
             window.addEventListener('message', responseFunc, false);
 
@@ -44,6 +44,14 @@ var IdeActions =
         return sendMessageToInjectedScript({action:'playMatch'});
     }
 
+    function getAgentsData() {
+        return sendMessageToInjectedScript({action:'getAgentsData'});
+    }
+
+    function sendToIde(state) {
+        return sendMessageToInjectedScript({action:'sendToIde', state: state});
+    }
+
     function batchRun() {
         options.getRunParameters()
             .then(params => {
@@ -65,5 +73,7 @@ var IdeActions =
         actions.setGameOptionsToAuto = setGameOptionsToAuto;
         actions.stopPlayback = stopPlayback;
         actions.playMatch = playMatch;
+        actions.getAgentsData = getAgentsData;
+        actions.sendToIde = sendToIde;
     };
 })(BatchRunOptions, BatchRunner);

@@ -33,6 +33,14 @@
         }
     }
   },
+  "replayBtnTip": {
+    "message": "Replay this match",
+    "description": "Tooltip describing the use of the Replay button"
+  },
+  "sendBtnTip": {
+    "message": "Send to the IDE",
+    "description": "Tooltip describing the use of the Send to IDE button"
+  },
   "btnSwapAgents": {
     "message": "SWAP",
     "description": "Button to switch the order of AI agents"

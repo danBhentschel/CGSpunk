@@ -7,6 +7,8 @@
         if (data.action === 'setGameOptionsManual') setGameOptionsManual(data.value);
         if (data.action === 'playMatch') playMatch();
         if (data.action === 'stopPlayback') stopPlayback();
+        if (data.action === 'getAgentsData') getAgentsData();
+        if (data.action === 'sendToIde') sendToIde(data.state);
     }, false);
 
     function rotateAgents() {
@@ -14,11 +16,8 @@
             return $(this).find('.nickname').text();
         }).get();
 
-        let scopes = angular.element('.agent').map(function() {
-            return $(this).scope();
-        }).get();
-
-        let agents = scopes.map(scope => scope.$parent.agent);
+        let scopes = getScopesForAgents();
+        let agents = getAgentsFromScopes(scopes);
         agents.push(agents.shift());
 
         for (let i = 0; i < scopes.length; i++) {
@@ -26,32 +25,52 @@
             scopes[i].$apply();
         }
 
-        checkForAgentsAdded(names[agents.length-1], 0);
+        waitForAgentsAdded(names[agents.length-1], 0)
+            .then(() => window.postMessage({action:'rotateAgentsComplete'}, '*'));
     }
 
-    function checkForAgentsAdded(name, index) {
-        let found = angular.element('.agent').eq(index).find('.nickname').text();
-        if (found === name) {
-            window.postMessage({action:'rotateAgentsComplete'}, '*');
-        } else {
-            setTimeout(() => checkForAgentsAdded(name, index), 10);
-        }
+    function getScopesForAgents() {
+        return angular.element('.agent').map(function() {
+            return $(this).scope();
+        }).get();
+    }
+
+    function getAgentsFromScopes(scopes) {
+        return scopes.map(scope => scope.$parent.agent);
+    }
+
+    function waitForAgentsAdded(name, index) {
+        return new Promise(resolve => {
+            let found = angular.element('.agent').eq(index).find('.nickname').text();
+            if (found === name) {
+                resolve();
+            } else {
+                setTimeout(() => checkForAgentsAdded(name, index), 10);
+            }
+        });
     }
 
     function setGameOptionsManual(value) {
+        doSetGameOptionsManual(value)
+            .then(() => window.postMessage({action:'setGameOptionsManualComplete'}, '*'));
+    }
+
+    function doSetGameOptionsManual(value) {
         let scope = angular.element('.cg-ide-game-options-editor').scope();
         scope.apis.gameOptions.gameOptionsManual = value;
         scope.$apply();
 
-        checkForGameOptionsManual(value);
+        return waitForGameOptionsManual(value);
     }
 
-    function checkForGameOptionsManual(value) {
-        if (angular.element('.options-text').prop('readonly') !== value) {
-            window.postMessage({action:'setGameOptionsManualComplete'}, '*');
-        } else {
-            setTimeout(() => checkForGameOptionsManual(value), 10);
-        }
+    function waitForGameOptionsManual(value) {
+        return new Promise(resolve => {
+            if (angular.element('.options-text').prop('readonly') !== value) {
+                resolve();
+            } else {
+                setTimeout(() => checkForGameOptionsManual(value), 10);
+            }
+        });
     }
 
     function stopPlayback() {
@@ -120,6 +139,23 @@
 
     function playIsInProgress() {
         return angular.element('.play').scope().api.playInProgress;
+    }
+
+    function getAgentsData() {
+        let agents = getAgentsFromScopes(getScopesForAgents());
+        window.postMessage({action: 'getAgentsDataComplete', result: agents}, '*');
+    }
+
+    function sendToIde(state) {
+        let scopes = getScopesForAgents();
+        for (let i = 0; i < scopes.length; i++) {
+            scopes[i].api.addAgent(state.agents[i], i);
+            scopes[i].$apply();
+        }
+
+        doSetGameOptionsManual(true)
+            .then(() => angular.element('.options-text').val(state.options))
+            .then(() => window.postMessage({action:'sendToIdeComplete'}, '*'));
     }
 
     if (!angular.isDefined(angular.element('#content').scope()))
