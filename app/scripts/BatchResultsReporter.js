@@ -2,7 +2,7 @@ var BatchResultsReporter =
 (function() {
     'use strict';
 
-    function reportMatch(match, results, iterations) {
+    function reportMatch(match, results, params) {
         let msg = '';
         match.rankings.forEach(_ => {
             msg += _.name + ': ' + results.wins[_.name] + '  ';
@@ -14,7 +14,7 @@ var BatchResultsReporter =
             results: {
                 match: match,
                 rollup: results,
-                iterations: iterations
+                params: params
             }
         });
     }

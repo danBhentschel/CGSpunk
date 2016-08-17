@@ -1,14 +1,16 @@
 var BatchRunner =
 (function(dom, recorder, reporter) {
 
-    function runBatch(params) {
+    function runBatch(params, ideActions) {
         dom.toggleBatchButtons();
         chrome.runtime.sendMessage({ action: 'showResultsWindow' });
 
         let context = {
             params: params,
+            ideActions: ideActions,
             results: recorder.createNew(),
             iteration: 1,
+            swapped: false,
             stop: false
         };
 
@@ -26,10 +28,29 @@ var BatchRunner =
         dom.clickPlayButton();
         dom.getResultsOfRun().then(results => {
             context.results = recorder.recordMatch(results, context.results);
-            reporter.reportMatch(results, context.results, context.params.iterations);
-            context.iteration++;
-            doIteration(context);
+            reporter.reportMatch(results, context.results, context.params);
+            doNextIteration(context);
         });
+    }
+
+    function doNextIteration(context) {
+        if (context.params.runSwapped && !context.swapped) {
+            context.swapped = true;
+            context.ideActions.rotateAgents()
+                .then(context.ideActions.setGameOptionsToManual)
+                .then(() => doIteration(context));
+        } else {
+            context.iteration++;
+            if (context.iteration > 1 && context.params.runSwapped) {
+                context.swapped = false;
+                context.ideActions.rotateAgents()
+                    .then(context.ideActions.setGameOptionsToAuto)
+                    .then(() => doIteration(context));
+            } else {
+                context.ideActions.setGameOptionsToAuto()
+                    .then(() => doIteration(context));
+            }
+        }
     }
 
     function stopBatch(context) {

@@ -1,6 +1,6 @@
 'use strict';
 
-var runs = 0;
+var matchNum = 0;
 var nameOrder = [];
 
 chrome.runtime.onMessage.addListener((request) => {
@@ -10,12 +10,17 @@ chrome.runtime.onMessage.addListener((request) => {
 });
 
 function addRun(results) {
-    if (runs === 0) populateHeaders(results.match.rankings);
+    if (matchNum === 0) populateHeaders(results.match.rankings);
 
-    runs++;
-    $('#numRuns').text(runs + ' / ' + results.iterations);
+    matchNum++;
+    var runSwapped = results.params.runSwapped;
+    var runNum = runSwapped ? Math.ceil(matchNum/2) : matchNum;
+    var swapped = runSwapped ? matchNum%2 === 0 : false;
+    var runs = results.params.iterations;
+    var matches = runSwapped ? runs*2 : runs;
+    $('#numRuns').text(matchNum + ' / ' + matches);
 
-    addRowToTable(results.match);
+    addRowToTable(results.match, runNum, swapped);
     updateSummary(results.rollup);
 }
 
@@ -40,11 +45,12 @@ function populateHeaders(rankings) {
     $('#summary').append('<h3>Ties: <span id="ties">0</span></h3>');
 }
 
-function addRowToTable(match) {
+function addRowToTable(match, runNum, swapped) {
     let rankings = match.rankings;
     let row = '<tr>';
-    row += '<td><button type="button" class="btn btn-success" id="replayBtn' + runs + '"><span class="glyphicon glyphicon-play"></span></button></td>';
-    row += '<td>' + runs + '</td>';
+    row += '<td><button type="button" class="btn btn-success" id="replayBtn' + matchNum + '"><span class="glyphicon glyphicon-play"></span></button></td>';
+    var runLabel = swapped ? chrome.i18n.getMessage('swappedRun', [ runNum ]) : runNum;
+    row += '<td>' + runLabel + '</td>';
 
     for (let i = 0; i < nameOrder.length; i++) {
         let entry = rankings.find(_ => _.name == nameOrder[i]);
@@ -52,11 +58,11 @@ function addRowToTable(match) {
     }
 
     row += '<td>' + (match.crash
-               ? '<button type="button" class="btn btn-danger" id="crashBtn' + runs + '"><span class="glyphicon glyphicon-exclamation-sign"></span></button>'
+               ? '<button type="button" class="btn btn-danger" id="crashBtn' + matchNum + '"><span class="glyphicon glyphicon-exclamation-sign"></span></button>'
                : '') + '</td>';
-    row += '<td><button type="button" class="btn btn-link" id="optionsBtn' + runs + '">' +
+    row += '<td><button type="button" class="btn btn-link" id="optionsBtn' + matchNum + '">' +
         chrome.i18n.getMessage('btnOptions') + '</button></td>';
-    row += '<td><button type="button" class="btn btn-link" id="stderrBtn' + runs + '">' +
+    row += '<td><button type="button" class="btn btn-link" id="stderrBtn' + matchNum + '">' +
         chrome.i18n.getMessage('btnStderr') + '</button></td>';
     row += '</tr>';
 
@@ -65,7 +71,7 @@ function addRowToTable(match) {
     tbody.append(row);
 
     if (match.crash) {
-        tbody.on('click', '#crashBtn' + runs, () => {
+        tbody.on('click', '#crashBtn' + matchNum, () => {
             chrome.runtime.sendMessage({
                 action: 'showMatchCrashInfo',
                 crashInfo: match.crash
@@ -73,21 +79,21 @@ function addRowToTable(match) {
         });
     }
 
-    tbody.on('click', '#optionsBtn' + runs, () => {
+    tbody.on('click', '#optionsBtn' + matchNum, () => {
         chrome.runtime.sendMessage({
             action: 'showMatchOptions',
             options: match.options
         });
     });
 
-    tbody.on('click', '#stderrBtn' + runs, () => {
+    tbody.on('click', '#stderrBtn' + matchNum, () => {
         chrome.runtime.sendMessage({
             action: 'showMatchStderr',
             stderr: match.stderr
         });
     });
 
-    tbody.on('click', '#replayBtn' + runs, () => {
+    tbody.on('click', '#replayBtn' + matchNum, () => {
 	window.open(match.replay);
     });
 }

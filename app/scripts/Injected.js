@@ -4,6 +4,7 @@
     window.addEventListener('message', function(event) {
         let data = event.data;
         if (data.action === 'rotateAgents') rotateAgents();
+        if (data.action === 'setGameOptionsManual') setGameOptionsManual(data.value);
     }, false);
 
     function rotateAgents() {
@@ -27,11 +28,27 @@
     }
 
     function checkForAgentsAdded(name, index) {
-        var found = angular.element('.agent').eq(index).find('.nickname').text();
+        let found = angular.element('.agent').eq(index).find('.nickname').text();
         if (found === name) {
             window.postMessage({action:'rotateAgentsComplete'}, '*');
         } else {
             setTimeout(() => { checkForAgentsAdded(name, index); }, 10);
+        }
+    }
+
+    function setGameOptionsManual(value) {
+        let scope = angular.element('.cg-ide-game-options-editor').scope();
+        scope.apis.gameOptions.gameOptionsManual = value;
+        scope.$apply();
+
+        checkForGameOptionsManual(value);
+    }
+
+    function checkForGameOptionsManual(value) {
+        if (angular.element('.options-text').prop('readonly') !== value) {
+            window.postMessage({action:'setGameOptionsManualComplete'}, '*');
+        } else {
+            setTimeout(() => { checkForGameOptionsManual(value); }, 10);
         }
     }
 

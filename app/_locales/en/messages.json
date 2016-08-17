@@ -23,6 +23,16 @@
     "message": "STDERR",
     "description": "Link title for the Batch Run results table"
   },
+  "swappedRun": {
+    "message": "$RUN_NUM$ (swapped)",
+    "description": "Title for swapped matches in the Batch Run results table",
+    "placeholders": {
+        "run_num": {
+            "content": "$1",
+            "example": "1"
+        }
+    }
+  },
   "btnSwapAgents": {
     "message": "SWAP",
     "description": "Button to switch the order of AI agents"

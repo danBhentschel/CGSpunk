@@ -12,10 +12,19 @@
 
 <!-- Haven't implemented translation -->
 <div class="container">
+
     <h1>Run a set of matches</h1>
-    <label for="iterations">Iterations:</label>
-    <input type="text" class="form-control" id="iterations" />
-    <button type="button" class="btn btn-primary" id="startRunButton">Start run</button>
+
+    <div class="form-group">
+        <label for="iterations">Number of iterations:</label>
+        <input type="text" class="form-control" id="iterations" />
+    </div>
+    <div class="checkbox">
+        <label>
+            <input type="checkbox" id="enableSwap" /> Perform each iteration a second time with positions swapped
+        </label>
+    </div>
+    <button type="submit" class="btn btn-primary" id="startRunButton">Start run</button>
 </div>
 
 
