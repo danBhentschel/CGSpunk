@@ -7,6 +7,22 @@
     "message": "A Chrome extension to enhance the CodinGame experience",
     "description": "The description of the application"
   },
+  "hdrRunNum": {
+    "message": "Run #",
+    "description": "Column header for the Batch Run results table"
+  },
+  "hdrCrash": {
+    "message": "Crash",
+    "description": "Column header for the Batch Run results table"
+  },
+  "btnOptions": {
+    "message": "Options",
+    "description": "Link title for the Batch Run results table"
+  },
+  "btnStderr": {
+    "message": "STDERR",
+    "description": "Link title for the Batch Run results table"
+  },
   "btnSwapAgents": {
     "message": "SWAP",
     "description": "Button to switch the order of AI agents"

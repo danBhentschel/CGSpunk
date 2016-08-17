@@ -20,7 +20,9 @@ function addRun(results) {
 }
 
 function populateHeaders(rankings) {
-    let header = '<tr><th>Run #</th>';
+    let header = '<tr><th><!-- Replay --></th>';
+    
+    header += '<th>' + chrome.i18n.getMessage('hdrRunNum') + '</th>';
 
     for (let i = 0; i < rankings.length; i++) {
         var name = rankings[i].name;
@@ -29,7 +31,10 @@ function populateHeaders(rankings) {
         $('#summary').append('<h3>' + name + ': <span id="wins' + i + '">0</span></h3>');
     }
 
-    header += '<th>Crash</th><th>Options</th><th>STDERR</th><th>Replay</th></tr>';
+    header += '<th>' + chrome.i18n.getMessage('hdrCrash') + '</th>';
+    header += '<th><!-- Options --></th>';
+    header += '<th><!-- STDERR --></th>';
+    header += '</tr>';
 
     $('#resultsTableHead').append(header);
     $('#summary').append('<h3>Ties: <span id="ties">0</span></h3>');
@@ -37,7 +42,9 @@ function populateHeaders(rankings) {
 
 function addRowToTable(match) {
     let rankings = match.rankings;
-    let row = '<tr><td>' + runs + '</td>';
+    let row = '<tr>';
+    row += '<td><button type="button" class="btn btn-success" id="replayBtn' + runs + '"><span class="glyphicon glyphicon-play"></span></button></td>';
+    row += '<td>' + runs + '</td>';
 
     for (let i = 0; i < nameOrder.length; i++) {
         let entry = rankings.find(_ => _.name == nameOrder[i]);
@@ -47,9 +54,10 @@ function addRowToTable(match) {
     row += '<td>' + (match.crash
                ? '<button type="button" class="btn btn-danger" id="crashBtn' + runs + '"><span class="glyphicon glyphicon-exclamation-sign"></span></button>'
                : '') + '</td>';
-    row += '<td><button type="button" class="btn btn-default" id="optionsBtn' + runs + '">See options</button></td>';
-    row += '<td><button type="button" class="btn btn-default" id="stderrBtn' + runs + '">See STDERR</button></td>';
-    row += '<td><button type="button" class="btn btn-default" id="replayBtn' + runs + '"><span class="glyphicon glyphicon-share-alt"></span></button></td>';
+    row += '<td><button type="button" class="btn btn-link" id="optionsBtn' + runs + '">' +
+        chrome.i18n.getMessage('btnOptions') + '</button></td>';
+    row += '<td><button type="button" class="btn btn-link" id="stderrBtn' + runs + '">' +
+        chrome.i18n.getMessage('btnStderr') + '</button></td>';
     row += '</tr>';
 
     let tbody = $('#resultsTable tbody');
