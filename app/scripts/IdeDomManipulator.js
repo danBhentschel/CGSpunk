@@ -85,42 +85,13 @@ var IdeDomManipulator =
     function waitForResults(resolve) {
         let rankedNames = $('.cg-ide-mini-leaderboard').find('.nickname');
         if ($('.play').is(':disabled') || rankedNames.length == 0) {
-            setTimeout(() => { waitForResults(resolve); }, 200);
+            setTimeout(() => waitForResults(resolve), 200);
         } else {
-            getResults(rankedNames).then(results => resolve(results));
+            resolve(getResults(rankedNames));
         }
     }
 
     function getResults(rankedNames) {
-        return new Promise(resolve => {
-            pauseReplay().then(() => resolve(doGetResults(rankedNames)));
-        });
-    }
-
-    function pauseReplay() {
-        return new Promise(resolve => {
-            if (replayIsPlaying()) {
-                $('.play-pause-button').click();
-                setTimeout(() => { waitForReplayToStop(resolve); }, 50);
-            } else {
-                resolve();
-            }
-        });
-    }
-
-    function replayIsPlaying() {
-        return $('.player').is('.playing');
-    }
-
-    function waitForReplayToStop(resolve) {
-        if (replayIsPlaying()) {
-            setTimeout(() => { waitForReplayToStop(resolve); }, 50);
-        } else {
-            resolve();
-        }
-    }
-
-    function doGetResults(rankedNames) {
         let results = {
             rankings: [],
             options: getMatchOptions(),
@@ -145,7 +116,6 @@ var IdeDomManipulator =
     }
 
     function getMatchStderr() {
-        pauseReplay().then
         let stderr = [];
 
         $('.stderr > .outputLine').each(function() {

@@ -25,12 +25,14 @@ var BatchRunner =
             return;
         }
 
-        dom.clickPlayButton();
-        dom.getResultsOfRun().then(results => {
-            context.results = recorder.recordMatch(results, context.results);
-            reporter.reportMatch(results, context.results, context.params);
-            doNextIteration(context);
-        });
+        context.ideActions.playMatch()
+            .then(context.ideActions.stopPlayback)
+            .then(dom.getResultsOfRun)
+            .then(results => {
+                context.results = recorder.recordMatch(results, context.results);
+                reporter.reportMatch(results, context.results, context.params);
+                doNextIteration(context);
+            });
     }
 
     function doNextIteration(context) {

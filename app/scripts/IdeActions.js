@@ -4,18 +4,24 @@ var IdeActions =
 
     var g_runContext;
 
-    function rotateAgents() {
+    function sendMessageToInjectedScript(message) {
         return new Promise(resolve => {
+            let actionComplete = message.action + 'Complete';
+
             let responseFunc = (event) => {
                 let data = event.data;
-                if (data.action !== 'rotateAgentsComplete') return;
+                if (data.action !== actionComplete) return;
                 window.removeEventListener('message', responseFunc, false);
                 resolve();
             };
             window.addEventListener('message', responseFunc, false);
 
-            window.postMessage({action:'rotateAgents'}, '*');
+            window.postMessage(message, '*');
         });
+    }
+
+    function rotateAgents() {
+        return sendMessageToInjectedScript({action:'rotateAgents'});
     }
 
     function setGameOptionsToManual() {
@@ -27,17 +33,15 @@ var IdeActions =
     }
 
     function setGameOptionsManual(value) {
-        return new Promise(resolve => {
-            let responseFunc = (event) => {
-                let data = event.data;
-                if (data.action !== 'setGameOptionsManualComplete') return;
-                window.removeEventListener('message', responseFunc, false);
-                resolve();
-            };
-            window.addEventListener('message', responseFunc, false);
+        return sendMessageToInjectedScript({action:'setGameOptionsManual', value: value});
+    }
 
-            window.postMessage({action:'setGameOptionsManual', value: value}, '*');
-        });
+    function stopPlayback() {
+        return sendMessageToInjectedScript({action:'stopPlayback'});
+    }
+
+    function playMatch() {
+        return sendMessageToInjectedScript({action:'playMatch'});
     }
 
     function batchRun() {
@@ -59,5 +63,7 @@ var IdeActions =
         actions.stopBatch = stopBatch;
         actions.setGameOptionsToManual = setGameOptionsToManual;
         actions.setGameOptionsToAuto = setGameOptionsToAuto;
+        actions.stopPlayback = stopPlayback;
+        actions.playMatch = playMatch;
     };
 })(BatchRunOptions, BatchRunner);
