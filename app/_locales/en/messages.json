@@ -52,5 +52,17 @@
   "btnStopBatch": {
     "message": "STOP",
     "description": "Button to stop a batch run in progress"
+  },
+  "defaultOrderLabel": {
+    "message": "Default order",
+    "description": "Heading for a section in the batch run summary"
+  },
+  "swappedOrderLabel": {
+    "message": "Swapped order",
+    "description": "Heading for a section in the batch run summary"
+  },
+  "significantRunsLabel": {
+    "message": "Runs where order matters",
+    "description": "Heading for a section in the batch run summary"
   }
 }

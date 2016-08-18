@@ -3,27 +3,41 @@ var BatchRunRecorder =
     'use strict';
 
     function createNew() {
+        return { defaultOrder: createSection() };
+    }
+
+    function createSection() {
         return {
-            matches: [],
+            runs: [],
             wins: {},
             ties: 0
         };
     }
 
     function recordMatch(match, results) {
-        results.matches.push(match);
+        let section = results.defaultOrder;
+
+        if (match.isMatchSwapped) {
+            if (typeof results.swappedOrder === 'undefined') {
+                results.swappedOrder = createSection();
+            }
+            section = results.swappedOrder;
+        }
+
+        section.runs.push(match);
+
         let winners = [];
-        match.rankings.forEach(_ => {
-            if (!results.wins.hasOwnProperty(_.name)) {
-                results.wins[_.name] = 0;
+        match.matchResults.rankings.forEach(_ => {
+            if (!section.wins.hasOwnProperty(_.name)) {
+                section.wins[_.name] = 0;
             }
             if (_.rank == 1) winners.push(_.name);
         });
 
         if (winners.length === 1) {
-            results.wins[winners[0]]++;
+            section.wins[winners[0]]++;
         } else {
-            results.ties++;
+            section.ties++;
         }
 
         return results;

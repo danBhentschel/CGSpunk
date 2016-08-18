@@ -30,8 +30,9 @@ var BatchRunner =
             .then(dom.getResultsOfMatch)
             .then(results => addAgentsInfoToResults(context.ideActions, results))
             .then(results => {
-                context.results = recorder.recordMatch(results, context.results);
-                reporter.reportMatch(results, context.results, context.params);
+                let match = prepareMatchResults(context, results);
+                context.results = recorder.recordMatch(match, context.results);
+                reporter.reportMatch(match, context.results, context.params);
                 doNextIteration(context);
             });
     }
@@ -42,6 +43,13 @@ var BatchRunner =
                 results.agents = agents;
                 return results;
             });
+    }
+
+    function prepareMatchResults(context, results) {
+        return {
+            matchResults: results,
+            isMatchSwapped: context.swapped
+        };
     }
 
     function doNextIteration(context) {
