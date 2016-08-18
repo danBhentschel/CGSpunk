@@ -11,14 +11,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         g_optionsResponseFunc(request.options);
     } else if (request.action === 'showResultsWindow') {
         showResultsWindow();
-    } else if (request.action === 'showMatchOptions') {
-        showOptionsWindow(request.options);
     } else if (request.action === 'showMatchStderr') {
         showStderrWindow(request.stderr);
     } else if (request.action === 'showMatchCrashInfo') {
         showCrashInfoWindow(request.crashInfo);
-    } else if (request.action === 'getLastOptions') {
-        sendResponse(g_lastOptions);
     } else if (request.action === 'getLastStderr') {
         sendResponse(g_lastStderr);
     } else if (request.action === 'getLastCrashInfo') {
@@ -40,18 +36,6 @@ function showResultsWindow() {
         url: 'dialogs/batchRunResults.html',
         type: 'popup',
         width: 700,
-        height: 600
-    });
-}
-
-var g_lastOptions;
-
-function showOptionsWindow(options) {
-    g_lastOptions = options;
-    chrome.windows.create({
-        url: 'dialogs/matchOptions.html',
-        type: 'popup',
-        width: 600,
         height: 600
     });
 }
