@@ -4,11 +4,15 @@
     window.addEventListener('message', function(event) {
         let data = event.data;
         if (data.action === 'rotateAgents') rotateAgents();
-        if (data.action === 'setGameOptionsManual') setGameOptionsManual(data.value);
+        if (data.action === 'setGameOptionsManual') setGameOptionsManual(data.data);
         if (data.action === 'playMatch') playMatch();
         if (data.action === 'stopPlayback') stopPlayback();
         if (data.action === 'getAgentsData') getAgentsData();
-        if (data.action === 'sendToIde') sendToIde(data.state);
+        if (data.action === 'sendToIde') sendToIde(data.data);
+        if (data.action === 'getAgentsAroundRank') getAgentsAroundRank(data.data);
+        if (data.action === 'getCurrentUser') getCurrentUser();
+        if (data.action === 'getCurrentUserArenaAgent') getCurrentUserArenaAgent();
+        if (data.action === 'addAgent') addAgent(data.data);
     }, false);
 
     function rotateAgents() {
@@ -36,7 +40,11 @@
     }
 
     function getAgentsFromScopes(scopes) {
-        return scopes.map(scope => scope.$parent.agent);
+        return scopes.map(scope => scope.$parent.agent).filter(validAgent);
+    }
+
+    function validAgent(agent) {
+        return agent != null;
     }
 
     function waitForAgentsAdded(name, index) {
@@ -143,7 +151,24 @@
 
     function getAgentsData() {
         let agents = getAgentsFromScopes(getScopesForAgents());
+        agents = agents.map(agent => {
+            return {
+                agent: agent,
+                name: getNameOfAgent(agent),
+                imageUrl: getImageUrlForAgent(agent)
+            };
+        });
         window.postMessage({action: 'getAgentsDataComplete', result: agents}, '*');
+    }
+
+    function getNameOfAgent(agent) {
+        return agent.codingamer ? agent.codingamer.pseudo : agent.arenaboss.nickname;
+    }
+
+    function getImageUrlForAgent(agent) {
+        var style = angular.element('.agent').scope().getAvatarStyleOfAgent(agent);
+        if (style == null || !style.hasOwnProperty('background-image')) return '';
+        return style['background-image'].replace(/^(url\()/, '').replace(/(\))$/, '');
     }
 
     function sendToIde(state) {
@@ -156,6 +181,56 @@
         doSetGameOptionsManual(true)
             .then(() => angular.element('.options-text').val(state.options))
             .then(() => window.postMessage({action:'sendToIdeComplete'}, '*'));
+    }
+
+    function getAgentsAroundRank(rank) {
+        let scope = getScopesForAgents()[0];
+        let leaderboard = scope.api.getLeaderboard();
+
+        waitForLeaderboardToBePopulated(leaderboard)
+            .then(allAgents => {
+                let low = Math.max(0, rank - 100);
+                let high = Math.min(allAgents.length, rank + 100);
+
+                let agents = [];
+                for (let i = low; i < high; i++) agents.push(allAgents[i]);
+
+                return agents;
+            })
+            .then(agents => window.postMessage({action:'getAgentsAroundRankComplete', result: agents}, '*'));
+    }
+
+    function waitForLeaderboardToBePopulated(leaderboard) {
+        return new Promise(resolve => doWaitForLeaderboardToBePopulated(leaderboard, resolve));
+    }
+
+    function doWaitForLeaderboardToBePopulated(leaderboard, resolve) {
+        if (leaderboard.$$state.status) {
+            resolve(leaderboard.$$state.value.users);
+        } else {
+            setTimeout(() => doWaitForLeaderboardToBePopulated(leaderboard, resolve), 10);
+        }
+    }
+
+    function getCurrentUser() {
+        let user = angular.element('.avatar').injector().get('codinGamerService').codinGamer;
+        window.postMessage({action:'getCurrentUserComplete', result: user}, '*');
+    }
+
+    function getCurrentUserArenaAgent() {
+        let agent = angular.element('.agent').scope().api.arena.userRank;
+        agent.specialAgent = true;
+        window.postMessage({action:'getCurrentArenaAgentComplete', result: agent}, '*');
+    }
+
+    function addAgent(addInfo) {
+        let index = addInfo.index;
+        let agent = addInfo.agent;
+
+        let scopes = getScopesForAgents();
+        scopes[index].api.addAgent(agent, index);
+        scopes[index].$apply();
+        window.postMessage({action:'addAgentComplete'}, '*');
     }
 
     if (!angular.isDefined(angular.element('#content').scope()))

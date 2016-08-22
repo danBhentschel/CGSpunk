@@ -4,8 +4,10 @@
 <head>
 <title>CG Spunk batch runner options</title>
 <link rel="stylesheet" href="../bower_components/bootstrap/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="../bower_components/font-awesome/css/font-awesome.min.css">
 <script src="../bower_components/jquery/dist/jquery.min.js"></script>
 <script src="../bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+<script src="../scripts/QueryStringHelper.js"></script>
 <script src="../scripts/batchRunOptionsDialog.js"></script>
 </head>
 <body>
@@ -24,7 +26,31 @@
             <input type="checkbox" id="enableSwap" /> Perform each iteration a second time with positions swapped
         </label>
     </div>
-    <button type="submit" class="btn btn-primary" id="startRunButton">Start run</button>
+
+    <fieldset class="form-group">
+        <legend>Opponent(s)</legend>
+        <div class="form-group">
+            <ul class="nav nav-pills nav-stacked" id="opponentSelectionType">
+                <li class="active"><a href="" data-toggle="pill" id="opponentCurrent">Use the current opponent in the IDE</a></li>
+                <li><a href="" data-toggle="pill" id="opponentRange">Select from a range of opponents ranked above and below me</a></li>
+            </ul>
+        </div>
+
+        <div id="opponentSelectRange" class="collapse form-group">
+            <label for="selectRange">Range size:</label>
+            <select class="form-control" id="selectRange">
+                <option>1</option>
+                <option>2</option>
+                <option>5</option>
+                <option>10</option>
+                <option>25</option>
+                <option>50</option>
+                <option>100</option>
+            </select>
+        </div>
+    </fieldset>
+
+    <button type="submit" class="btn btn-success" id="startRunButton"><i class="glyphicon glyphicon-play"></i> Start run</button>
 </div>
 
 

@@ -10,16 +10,16 @@ chrome.runtime.onMessage.addListener((request, sender) => {
 });
 
 function addRun(results, tabId) {
-    let runSwapped = results.params.runSwapped;
+    let swapEnabled = results.params.swapEnabled;
 
     let matchResults = results.match.matchResults; 
-    if (matchNum === 0) populateHeaders(matchResults.rankings, runSwapped);
+    if (matchNum === 0) populateHeaders(matchResults.rankings, swapEnabled);
 
     matchNum++;
     let runNum = results.rollup.defaultOrder.runs.length;
     let swapped = results.match.isMatchSwapped;
     let totalRuns = results.params.iterations;
-    let matches = runSwapped ? totalRuns*2 : totalRuns;
+    let matches = swapEnabled ? totalRuns*2 : totalRuns;
     $('#numMatches').text(matchNum + ' / ' + matches);
 
     addRowToTable(matchResults, runNum, swapped, tabId);

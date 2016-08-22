@@ -25,7 +25,8 @@ var BatchRunner =
             return;
         }
 
-        context.ideActions.playMatch()
+        selectNextOpponent(context)
+            .then(context.ideActions.playMatch())
             .then(context.ideActions.stopPlayback)
             .then(dom.getResultsOfMatch)
             .then(results => addAgentsInfoToResults(context.ideActions, results))
@@ -53,14 +54,14 @@ var BatchRunner =
     }
 
     function doNextIteration(context) {
-        if (context.params.runSwapped && !context.swapped) {
+        if (context.params.swapEnabled && !context.swapped) {
             context.swapped = true;
             context.ideActions.rotateAgents()
                 .then(context.ideActions.setGameOptionsToManual)
                 .then(() => doIteration(context));
         } else {
             context.iteration++;
-            if (context.iteration > 1 && context.params.runSwapped) {
+            if (context.iteration > 1 && context.params.swapEnabled) {
                 context.swapped = false;
                 context.ideActions.rotateAgents()
                     .then(context.ideActions.setGameOptionsToAuto)
@@ -70,6 +71,15 @@ var BatchRunner =
                     .then(() => doIteration(context));
             }
         }
+    }
+
+    function selectNextOpponent(context) {
+        if (context.params.opponentSelectionType !== 'range') return new Promise(resolve => resolve());
+        if (context.params.swapEnabled && context.swapped) return new Promise(resolve => resolve());
+        let candidates = context.params.candidateAgents;
+        let numCandidates = candidates.length;
+        let opponent = candidates[Math.floor(Math.random() * numCandidates)];
+        return context.ideActions.addAgent(opponent, 1);
     }
 
     function stopBatch(context) {
