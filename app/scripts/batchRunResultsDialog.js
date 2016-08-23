@@ -1,5 +1,7 @@
 'use strict';
 
+var g_instanceNum = QueryStringHelper.getParameter(document.URL, 'instanceNum');
+var g_batchNum = -1;
 var g_matchNum;
 
 chrome.runtime.onMessage.addListener((request, sender) => {
@@ -9,6 +11,10 @@ chrome.runtime.onMessage.addListener((request, sender) => {
 });
 
 function addMatch(results, tabId) {
+    if (g_batchNum === -1) g_batchNum = results.params.batchNum;
+    if (g_instanceNum != results.params.instanceNum) return;
+    if (g_batchNum != results.params.batchNum) return;
+
     g_matchNum = results.matchNum;
 
     let matchResults = results.match.matchResults; 

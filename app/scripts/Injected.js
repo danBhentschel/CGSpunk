@@ -155,7 +155,9 @@
     }
 
     function getNameOfAgent(agent) {
-        return agent.codingamer ? agent.codingamer.pseudo : agent.arenaboss.nickname;
+        if (agent.codingamer) return agent.codingamer.pseudo;
+        if (agent.arenaboss) return agent.arenaboss.nickname;
+        return 'Default';
     }
 
     function getImageUrlForAgent(agent) {

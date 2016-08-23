@@ -1,9 +1,12 @@
 var BatchRunner =
 (function(dom, recorder, reporter) {
 
+    var g_instanceNum = Math.floor(Math.random()*999999 + 1);
+    var g_batchNum = 0;
+
     function runBatch(params, ideActions) {
         dom.toggleBatchButtons();
-        chrome.runtime.sendMessage({action:'showResultsWindow'});
+        chrome.runtime.sendMessage({action:'showResultsWindow', instanceNum: g_instanceNum});
 
         let context = {
             params: params,
@@ -13,6 +16,10 @@ var BatchRunner =
             swapped: false,
             stop: false
         };
+
+        params.instanceNum = g_instanceNum;
+        params.batchNum = g_batchNum;
+        g_batchNum++;
 
         ideActions.getCurrentUser()
             .then(user => {

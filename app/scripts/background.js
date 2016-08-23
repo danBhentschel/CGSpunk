@@ -10,7 +10,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     } else if (request.action === 'sendBatchOptionSelections') {
         g_optionsResponseFunc(request.options);
     } else if (request.action === 'showResultsWindow') {
-        showResultsWindow();
+        showResultsWindow(request.instanceNum);
     } else if (request.action === 'showMatchStderr') {
         showStderrWindow(request.stderr);
     } else if (request.action === 'showMatchCrashInfo') {
@@ -31,9 +31,9 @@ function showBatchRunOptionsWindow(tabId) {
     });
 }
 
-function showResultsWindow() {
+function showResultsWindow(instanceNum) {
     chrome.windows.create({
-        url: 'dialogs/batchRunResults.html',
+        url: 'dialogs/batchRunResults.html?instanceNum=' + instanceNum,
         type: 'popup',
         width: 700,
         height: 600
