@@ -11,9 +11,29 @@
     "message": "Run #",
     "description": "Column header for the Batch Run results table"
   },
-  "hdrCrash": {
-    "message": "Crash",
-    "description": "Column header for the Batch Run results table"
+  "tiedMatch": {
+    "message": "Tie",
+    "description": "Tied entry in Batch Run results table"
+  },
+  "winsTitle": {
+    "message": "Wins:",
+    "description": "Wins title for Batch Run summary"
+  },
+  "lossesTitle": {
+    "message": "Losses:",
+    "description": "Losses title for Batch Run summary"
+  },
+  "tiesTitle": {
+    "message": "Ties:",
+    "description": "Ties title for Batch Run summary"
+  },
+  "hdrWinner": {
+    "message": "Winner",
+    "description": "Winner title for the Batch Run results table"
+  },
+  "hdrPlayers": {
+    "message": "Players",
+    "description": "Players title for the Batch Run results table"
   },
   "btnOptions": {
     "message": "Options",

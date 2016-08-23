@@ -135,7 +135,7 @@
     }
 
     function startPlay() {
-        angular.element('.play').scope().api.play()
+        angular.element('.play').scope().api.play();
     }
 
     function playIsInProgress() {

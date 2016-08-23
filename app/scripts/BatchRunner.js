@@ -8,13 +8,17 @@ var BatchRunner =
         let context = {
             params: params,
             ideActions: ideActions,
-            results: recorder.createNew(),
+            results: recorder.createNew(params),
             iteration: 1,
             swapped: false,
             stop: false
         };
 
-        doIteration(context);
+        ideActions.getCurrentUser()
+            .then(user => {
+                params.currentUserName = user.pseudo;
+                doIteration(context);
+            });
 
         return context;
     }
@@ -32,7 +36,7 @@ var BatchRunner =
             .then(results => addAgentsInfoToResults(context.ideActions, results))
             .then(results => {
                 let match = prepareMatchResults(context, results);
-                context.results = recorder.recordMatch(match, context.results);
+                context.results = recorder.recordMatch(match, context.results, context.params);
                 reporter.reportMatch(match, context.results, context.params);
                 doNextIteration(context);
             });
