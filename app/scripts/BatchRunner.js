@@ -26,7 +26,7 @@ var BatchRunner =
         }
 
         selectNextOpponent(context)
-            .then(context.ideActions.playMatch())
+            .then(context.ideActions.playMatch)
             .then(context.ideActions.stopPlayback)
             .then(dom.getResultsOfMatch)
             .then(results => addAgentsInfoToResults(context.ideActions, results))

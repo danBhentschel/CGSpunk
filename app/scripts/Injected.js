@@ -9,7 +9,7 @@
         if (data.action === 'stopPlayback') stopPlayback();
         if (data.action === 'getAgentsData') getAgentsData();
         if (data.action === 'sendToIde') sendToIde(data.data);
-        if (data.action === 'getAgentsAroundRank') getAgentsAroundRank(data.data);
+        if (data.action === 'getAgentsAroundAgent') getAgentsAroundAgent(data.data);
         if (data.action === 'getCurrentUser') getCurrentUser();
         if (data.action === 'getCurrentUserArenaAgent') getCurrentUserArenaAgent();
         if (data.action === 'addAgent') addAgent(data.data);
@@ -83,8 +83,7 @@
 
     function stopPlayback() {
         waitForGameManager()
-            .then(pausePlayback)
-            .then(() => waitForPlayback(false))
+            .then(ensurePlaybackStopped)
             .then(() => window.postMessage({action:'stopPlaybackComplete'}, '*'));
     }
 
@@ -101,24 +100,18 @@
         }
     }
 
-    function waitForPlayback(value) {
-        return new Promise(resolve => doWaitForPlaybackRunningToBe(value, resolve));
+    function ensurePlaybackStopped() {
+        return new Promise(resolve => doEnsurePlaybackStopped(resolve));
     }
 
-    function doWaitForPlaybackRunningToBe(value, resolve) {
+    function doEnsurePlaybackStopped(resolve) {
         let gameManager = angular.element('.play-pause-button').scope().gameManager;
-        if (angular.isDefined(gameManager) && gameManager !== null && gameManager.playing === value) {
+        if (angular.isDefined(gameManager) && gameManager !== null && gameManager.playing === false) {
             resolve();
         } else {
-            setTimeout(() => doWaitForPlaybackRunningToBe(value, resolve), 10);
+            if (angular.isDefined(gameManager) && gameManager != null) gameManager.pause();
+            setTimeout(() => doEnsurePlaybackStopped(resolve), 10);
         }
-    }
-
-    function pausePlayback() {
-        return new Promise(resolve => setTimeout(() => {
-                angular.element('.play-pause-button').scope().gameManager.pause();
-                resolve();
-            }, 100));
     }
 
     function playMatch() {
@@ -183,21 +176,29 @@
             .then(() => window.postMessage({action:'sendToIdeComplete'}, '*'));
     }
 
-    function getAgentsAroundRank(rank) {
+    function getAgentsAroundAgent(data) {
         let scope = getScopesForAgents()[0];
         let leaderboard = scope.api.getLeaderboard();
 
         waitForLeaderboardToBePopulated(leaderboard)
             .then(allAgents => {
-                let low = Math.max(0, rank - 100);
-                let high = Math.min(allAgents.length, rank + 100);
+                let rank = 0;
+                let range = parseInt(data.range, 10);
+                for (let i = 0; i < allAgents.length; i++) {
+                    if (allAgents[i].pseudo === data.name) { rank = i; break; }
+                }
+                let low = Math.max(0, rank - range);
+                let high = Math.min(allAgents.length, rank + range);
 
                 let agents = [];
-                for (let i = low; i < high; i++) agents.push(allAgents[i]);
+                for (let i = low; i <= high; i++) {
+                    if (i === rank) continue;
+                    agents.push(allAgents[i]);
+                }
 
                 return agents;
             })
-            .then(agents => window.postMessage({action:'getAgentsAroundRankComplete', result: agents}, '*'));
+            .then(agents => window.postMessage({action:'getAgentsAroundAgentComplete', result: agents}, '*'));
     }
 
     function waitForLeaderboardToBePopulated(leaderboard) {
@@ -220,7 +221,7 @@
     function getCurrentUserArenaAgent() {
         let agent = angular.element('.agent').scope().api.arena.userRank;
         agent.specialAgent = true;
-        window.postMessage({action:'getCurrentArenaAgentComplete', result: agent}, '*');
+        window.postMessage({action:'getCurrentUserArenaAgentComplete', result: agent}, '*');
     }
 
     function addAgent(addInfo) {

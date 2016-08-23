@@ -64,8 +64,8 @@ var IdeActions =
         return sendMessageToInjectedScript({action:'sendToIde', data: state});
     }
 
-    function getAgentsAroundRank(rank) {
-        return sendMessageToInjectedScript({action:'getAgentsAroundRank', data: rank});
+    function getAgentsAroundAgent(name, range) {
+        return sendMessageToInjectedScript({action:'getAgentsAroundAgent', data: {name: name, range: range}});
     }
 
     function getCurrentUserArenaAgent() {
@@ -85,9 +85,10 @@ var IdeActions =
     }
 
     function prepareBatchRun(params) {
-        return getCurrentUserAgent()
-            .then(agent => {
-                return getAgentsAroundRank(agent.rank)
+        return getCurrentUserName()
+            .then(name => {
+                return ensureCurrentUserIsFirst(name)
+                    .then(() => getAgentsAroundAgent(name, params.opponentSelectionRange))
                     .then(agents => {
                         params.candidateAgents = agents;
                         return params;
@@ -95,29 +96,17 @@ var IdeActions =
             });
     }
 
-    function getCurrentUserAgent() {
-        return getCurrentUser()
-            .then(user => {
-                return getAgentsData()
-                    .then(agents => {
-                        if (agents[0].name === user.pseudo) {
-                            var agent = agents[0];
-                            agent.rank = user.rank;
-                            return agent;
-                        }
-                        if (agents[1].name === user.pseudo) {
-                            var agent = agents[1];
-                            agent.rank = user.rank;
+    function getCurrentUserName() {
+        return getCurrentUser().then(user => { return user.pseudo; });
+    }
 
-                            return rotateAgents()
-                                .then(() => { return agent; });
-                        }
-                        return getCurrentUserArenaAgent()
-                            .then(agent => {
-                                addAgent(agent, 0)
-                                    .then(() => { return agent; });
-                            });
-                    });
+    function ensureCurrentUserIsFirst(name) {
+        return getAgentsData()
+            .then(agents => {
+                if (agents[0].name === name) return;
+                if (agents[1].name === name) return rotateAgents();
+                return getCurrentUserArenaAgent()
+                    .then(agent => addAgent(agent, 0));
             });
     }
 
