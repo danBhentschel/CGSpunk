@@ -36,7 +36,7 @@
         "scripts/IdeActions.js",
         "scripts/contentscript_ide.js"
       ],
-      "run_at": "document_end",
+      "run_at": "document_start",
       "all_frames": false
     }
   ],
