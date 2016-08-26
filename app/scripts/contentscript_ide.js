@@ -40,7 +40,7 @@
 
     $(document).ready(injectScript);
 
-    let ngDebugStr = "NG_ENABLE_DEBUG_INFO!";
+    let ngDebugStr = 'NG_ENABLE_DEBUG_INFO!';
     if (window.name.indexOf(ngDebugStr) === -1) {
         window.name = ngDebugStr + window.name
     }

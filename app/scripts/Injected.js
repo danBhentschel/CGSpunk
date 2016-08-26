@@ -184,17 +184,16 @@
 
         waitForLeaderboardToBePopulated(leaderboard)
             .then(allAgents => {
-                let rank = 0;
                 let range = parseInt(data.range, 10);
-                for (let i = 0; i < allAgents.length; i++) {
-                    if (allAgents[i].pseudo === data.name) { rank = i; break; }
-                }
-                let low = Math.max(0, rank - range);
-                let high = Math.min(allAgents.length, rank + range);
+                let myAgent = allAgents.find(_ => _.pseudo === data.name);
+                allAgents = allAgents.filter(_ => _.league.divisionIndex === myAgent.league.divisionIndex);
+                let low = Math.max(0, myAgent.rank - range);
+                let high = Math.min(allAgents.length - 1, myAgent.rank + range);
 
                 let agents = [];
                 for (let i = low; i <= high; i++) {
-                    if (i === rank) continue;
+                    let thisAgent = allAgents[i];
+                    if (thisAgent.pseudo === myAgent.pseudo) continue;
                     agents.push(allAgents[i]);
                 }
 
