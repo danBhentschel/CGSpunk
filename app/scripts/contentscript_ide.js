@@ -40,6 +40,10 @@
 
     $(document).ready(injectScript);
 
+    chrome.runtime.onMessage.addListener(request => {
+        if (request.action === 'sendToIde') actions.sendToIde(request);
+    });
+
     let ngDebugStr = 'NG_ENABLE_DEBUG_INFO!';
     if (window.name.indexOf(ngDebugStr) === -1) {
         window.name = ngDebugStr + window.name
