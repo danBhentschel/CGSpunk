@@ -29,7 +29,7 @@
             scopes[i].$apply();
         }
 
-        waitForAgentsAdded(names[agents.length-1], 0)
+        waitForAgentsAdded(names[1], 0)
             .then(() => window.postMessage({action:'rotateAgentsComplete'}, '*'));
     }
 
@@ -48,14 +48,16 @@
     }
 
     function waitForAgentsAdded(name, index) {
-        return new Promise(resolve => {
-            let found = angular.element('.agent').eq(index).find('.nickname').text();
-            if (found === name) {
-                resolve();
-            } else {
-                setTimeout(() => checkForAgentsAdded(name, index), 10);
-            }
-        });
+        return new Promise(resolve => doWaitForAgentsAdded(resolve, name, index));
+    }
+
+    function doWaitForAgentsAdded(resolve, name, index) {
+        let found = angular.element('.agent').eq(index).find('.nickname').text();
+        if (found === name) {
+            resolve();
+        } else {
+            setTimeout(() => doWaitForAgentsAdded(resolve, name, index), 10);
+        }
     }
 
     function setGameOptionsManual(value) {
@@ -72,13 +74,15 @@
     }
 
     function waitForGameOptionsManual(value) {
-        return new Promise(resolve => {
-            if (angular.element('.options-text').prop('readonly') !== value) {
-                resolve();
-            } else {
-                setTimeout(() => checkForGameOptionsManual(value), 10);
-            }
-        });
+        return new Promise(resolve => doWaitForGameOptionsManual(resolve, value));
+    }
+
+    function doWaitForGameOptionsManual(resolve, value) {
+        if (angular.element('.options-text').prop('readonly') !== value) {
+            resolve();
+        } else {
+            setTimeout(() => doWaitForGameOptionsManual(resolve, value), 10);
+        }
     }
 
     function stopPlayback() {
@@ -88,12 +92,14 @@
     }
 
     function waitForGameManager() {
+        console.log("Waiting for game manager");
         return new Promise(resolve => doWaitForGameManager(resolve));
     }
 
     function doWaitForGameManager(resolve) {
         let gameManager = angular.element('.play-pause-button').scope().gameManager;
         if (angular.isDefined(gameManager) && gameManager !== null) {
+            console.log("Found game manager");
             resolve();
         } else {
             setTimeout(() => doWaitForGameManager(resolve), 10);
@@ -101,14 +107,17 @@
     }
 
     function ensurePlaybackStopped() {
+        console.log("Ensuring playback stopped");
         return new Promise(resolve => doEnsurePlaybackStopped(resolve));
     }
 
     function doEnsurePlaybackStopped(resolve) {
         let gameManager = angular.element('.play-pause-button').scope().gameManager;
         if (angular.isDefined(gameManager) && gameManager !== null && gameManager.playing === false) {
+            console.log("Playback is stopped");
             resolve();
         } else {
+            console.log("PAUSE");
             if (angular.isDefined(gameManager) && gameManager != null) gameManager.pause();
             setTimeout(() => doEnsurePlaybackStopped(resolve), 10);
         }
@@ -123,23 +132,27 @@
     }
 
     function waitForPlayInProgress(value) {
+        console.log("Waiting for play in progress: " + value);
         return new Promise(resolve => doWaitForPlayInProgress(value, resolve));
     }
 
     function doWaitForPlayInProgress(value, resolve) {
         if (playIsInProgress() === value) {
+            console.log("Found play in progress: " + value);
             resolve();
         } else {
             setTimeout(() => doWaitForPlayInProgress(value, resolve), 10);
         }
     }
 
-    function startPlay() {
-        angular.element('.play').scope().api.play();
-    }
-
     function playIsInProgress() {
         return angular.element('.play').scope().api.playInProgress;
+    }
+
+    function startPlay() {
+        console.log("Starting play");
+        angular.element('.play').scope().api.play();
+        console.log("Started");
     }
 
     function getAgentsData() {
