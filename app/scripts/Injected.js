@@ -24,7 +24,7 @@
         let agents = getAgentsFromScopes(scopes);
         agents.push(agents.shift());
 
-        for (let i = 0; i < scopes.length; i++) {
+        for (let i = 0; i < agents.length; i++) {
             scopes[i].api.addAgent(agents[i], i);
             scopes[i].$apply();
         }
