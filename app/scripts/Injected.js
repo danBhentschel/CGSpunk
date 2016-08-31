@@ -92,14 +92,12 @@
     }
 
     function waitForGameManager() {
-        console.log("Waiting for game manager");
         return new Promise(resolve => doWaitForGameManager(resolve));
     }
 
     function doWaitForGameManager(resolve) {
         let gameManager = angular.element('.play-pause-button').scope().gameManager;
         if (angular.isDefined(gameManager) && gameManager !== null) {
-            console.log("Found game manager");
             resolve();
         } else {
             setTimeout(() => doWaitForGameManager(resolve), 10);
@@ -107,17 +105,14 @@
     }
 
     function ensurePlaybackStopped() {
-        console.log("Ensuring playback stopped");
         return new Promise(resolve => doEnsurePlaybackStopped(resolve));
     }
 
     function doEnsurePlaybackStopped(resolve) {
         let gameManager = angular.element('.play-pause-button').scope().gameManager;
         if (angular.isDefined(gameManager) && gameManager !== null && gameManager.playing === false) {
-            console.log("Playback is stopped");
             resolve();
         } else {
-            console.log("PAUSE");
             if (angular.isDefined(gameManager) && gameManager != null) gameManager.pause();
             setTimeout(() => doEnsurePlaybackStopped(resolve), 10);
         }
@@ -132,13 +127,11 @@
     }
 
     function waitForPlayInProgress(value) {
-        console.log("Waiting for play in progress: " + value);
         return new Promise(resolve => doWaitForPlayInProgress(value, resolve));
     }
 
     function doWaitForPlayInProgress(value, resolve) {
         if (playIsInProgress() === value) {
-            console.log("Found play in progress: " + value);
             resolve();
         } else {
             setTimeout(() => doWaitForPlayInProgress(value, resolve), 10);
@@ -150,9 +143,7 @@
     }
 
     function startPlay() {
-        console.log("Starting play");
         angular.element('.play').scope().api.play();
-        console.log("Started");
     }
 
     function getAgentsData() {
