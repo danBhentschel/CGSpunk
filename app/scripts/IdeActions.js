@@ -12,7 +12,7 @@ var IdeActions =
         let actionComplete = message.action + 'Complete';
 
         let responseFunc = (event) => {
-                let data = event.data;
+            let data = event.data;
             if (data.action !== actionComplete) return;
             window.removeEventListener('message', responseFunc, false);
             sendResponse(data.result);

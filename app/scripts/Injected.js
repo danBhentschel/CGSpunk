@@ -1,6 +1,31 @@
 (function() {
     'use strict';
 
+    $(document).ready(() => {
+        angular.element('body').scope().$on('$routeChangeSuccess', (event, route) => {
+            if (!route['$$route']['templateUrl']) return;
+            if (!route['$$route']['templateUrl'].startsWith('modules/ide')) return;
+            waitForIdeApis()
+                .then(hasAgents => {
+                    if (!hasAgents) return;
+                    window.postMessage({action:'multiplayerIdeLoadedEvent'}, '*');
+                });
+        });
+    });
+
+    function waitForIdeApis() {
+        return new Promise(resolve => doWaitForIdeApis(resolve));
+    }
+
+    function doWaitForIdeApis(resolve) {
+        let $scope = angular.element('.ide-content').scope();
+        if (!!$scope) {
+            resolve(!!($scope.apis.agentsManagement));
+        } else {
+            setTimeout(() => doWaitForIdeApis(resolve), 10);
+        }
+    }
+
     window.addEventListener('message', function(event) {
         let data = event.data;
         if (data.action === 'rotateAgents') rotateAgents();
