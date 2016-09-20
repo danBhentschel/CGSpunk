@@ -12,6 +12,7 @@ var QueryStringHelper =
         name = name.replace(/[[^$.|?*+(){}\\]/g, '\\$&');
         let regex = new RegExp('(?:[?&]|^)' + name + '=([^&#]*)');
         let results = regex.exec(queryString);
+        if (results === null || results.length === 0) return null;
         return decodeURIComponent(results[1].replace(/\+/g, ' ')) || '';
     }
 

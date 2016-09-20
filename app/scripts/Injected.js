@@ -3,15 +3,36 @@
 
     $(document).ready(() => {
         angular.element('body').scope().$on('$routeChangeSuccess', (event, route) => {
-            if (!route['$$route']['templateUrl']) return;
-            if (!route['$$route']['templateUrl'].startsWith('modules/ide')) return;
-            waitForIdeApis()
-                .then(hasAgents => {
-                    if (!hasAgents) return;
-                    window.postMessage({action:'multiplayerIdeLoadedEvent'}, '*');
-                });
+            let url = route['$$route']['templateUrl'];
+            if (!url) return;
+            if (url.startsWith('modules/ide')) {
+                sendMultiplayerMessageWhenLoaded();
+            } else if (url.startsWith('modules/replay')) {
+                sendReplayMessageWhenLoaded();
+            }
         });
+
+        /*if (location.href.startsWith('https://www.codingame.com/ide/')) {
+            sendMultiplayerMessageWhenLoaded();
+        } else if (location.href.startsWith('https://www.codingame.com/replay/')) {
+            sendReplayMessageWhenLoaded();
+        }*/
     });
+
+    function sendMultiplayerMessageWhenLoaded() {
+        waitForIdeApis()
+            .then(hasAgents => {
+                if (!hasAgents) return;
+                window.postMessage({action:'multiplayerIdeLoadedEvent'}, '*');
+            });
+    }
+
+    function sendReplayMessageWhenLoaded() {
+        setTimeout(() => {
+        waitForGameManager()
+            .then(() => setTimeout(() => window.postMessage({action:'replayPlayerLoadedEvent'}, '*'), 2000));
+        }, 2000);
+    }
 
     function waitForIdeApis() {
         return new Promise(resolve => doWaitForIdeApis(resolve));
@@ -22,7 +43,7 @@
         if (!!$scope) {
             resolve(!!($scope.apis.agentsManagement));
         } else {
-            setTimeout(() => doWaitForIdeApis(resolve), 10);
+            setTimeout(() => doWaitForIdeApis(resolve), 100);
         }
     }
 
@@ -38,6 +59,7 @@
         if (data.action === 'getCurrentUser') getCurrentUser();
         if (data.action === 'getCurrentUserArenaAgent') getCurrentUserArenaAgent();
         if (data.action === 'addAgent') addAgent(data.data);
+        if (data.action === 'setPlaybackFrame') setPlaybackFrame(data.data);
     }, false);
 
     function rotateAgents() {
@@ -112,7 +134,8 @@
 
     function stopPlayback() {
         waitForGameManager()
-            .then(ensurePlaybackStopped)
+            .then(gameManager => { gameManager.pause(); return gameManager; })
+            .then(gameManager => ensurePlaybackStopped(gameManager))
             .then(() => window.postMessage({action:'stopPlaybackComplete'}, '*'));
     }
 
@@ -121,25 +144,44 @@
     }
 
     function doWaitForGameManager(resolve) {
-        let gameManager = angular.element('.play-pause-button').scope().gameManager;
-        if (angular.isDefined(gameManager) && gameManager !== null) {
-            resolve();
+        if (!(angular.element('.play-pause-button')) ||
+            !(angular.element('.play-pause-button').scope()) ||
+            !(angular.element('.play-pause-button').scope().gameManager)) {
+
+            setTimeout(() => doWaitForGameManager(resolve), 100);
         } else {
-            setTimeout(() => doWaitForGameManager(resolve), 10);
+            resolve(angular.element('.play-pause-button').scope().gameManager);
         }
     }
 
-    function ensurePlaybackStopped() {
-        return new Promise(resolve => doEnsurePlaybackStopped(resolve));
+    function ensurePlaybackStopped(gameManager) {
+        return new Promise(resolve => doEnsurePlaybackStopped(resolve, gameManager));
     }
 
-    function doEnsurePlaybackStopped(resolve) {
-        let gameManager = angular.element('.play-pause-button').scope().gameManager;
-        if (angular.isDefined(gameManager) && gameManager !== null && gameManager.playing === false) {
+    function doEnsurePlaybackStopped(resolve, gameManager) {
+        if (gameManager.playing === false) {
             resolve();
         } else {
-            if (angular.isDefined(gameManager) && gameManager != null) gameManager.pause();
-            setTimeout(() => doEnsurePlaybackStopped(resolve), 10);
+            setTimeout(() => doEnsurePlaybackStopped(resolve, gameManager), 100);
+        }
+    }
+
+    function setPlaybackFrame(frame) {
+        waitForGameManager()
+            .then(gameManager => { gameManager.setFrame(frame); return gameManager; })
+            .then(gameManager => ensurePlaybackFrameSetTo(frame, gameManager))
+            .then(() => window.postMessage({action:'setPlaybackFrameComplete'}, '*'));
+    }
+
+    function ensurePlaybackFrameSetTo(frame, gameManager) {
+        return new Promise(resove => doEnsurePlaybackFrameSetTo(resolve, frame, gameManager));
+    }
+
+    function doEnsurePlaybackFrameSetTo(resolve, frame, gameManager) {
+        if (gameManager.currentFrame === frame) {
+            resolve();
+        } else {
+            setTimeout(() => doEnsurePlaybackFrameSetTo(resolve, frame, gameManager), 100);
         }
     }
 

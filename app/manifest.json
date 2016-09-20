@@ -27,6 +27,7 @@
       ],
       "js": [
         "bower_components/jquery/dist/jquery.min.js",
+        "scripts/QueryStringHelper.js",
         "scripts/DomUtils.js",
         "scripts/IdeDomManipulator.js",
         "scripts/BatchRunOptions.js",
@@ -34,6 +35,7 @@
         "scripts/BatchResultsReporter.js",
         "scripts/BatchRunner.js",
         "scripts/IdeActions.js",
+        "scripts/contentscript.js",
         "scripts/contentscript_ide.js"
       ],
       "run_at": "document_start",
