@@ -6,48 +6,48 @@ var IdeDomManipulator =
 
     // public
     function createSwapButton(swapClicked) {
-        return new Promise(resolve => {
-            let panel = $('.cg-ide-agents-management > .scroll-panel');
-            let swapButton = document.createElement('BUTTON');
-            swapButton.innerHTML = chrome.i18n.getMessage('btnSwapAgents');
-            swapButton.setAttribute('id', 'cgspkSwapButton');
-            swapButton.style.padding = '5px 5px 5px 5px';
-            panel.append(swapButton);
+        return getAgentsScrollPanel()
+            .then(panel => {
+                if ($('#cgspkSwapButton').length > 0) return;
+                let swapButton = document.createElement('BUTTON');
+                swapButton.innerHTML = chrome.i18n.getMessage('btnSwapAgents');
+                swapButton.setAttribute('id', 'cgspkSwapButton');
+                swapButton.style.padding = '5px 5px 5px 5px';
+                panel.append(swapButton);
         
-            $('#cgspkSwapButton').click(swapClicked);
-            resolve();
-        });
+                $('#cgspkSwapButton').click(swapClicked);
+            });
     }
 
     // public
     function createBatchButton(batchClicked) {
-        return new Promise(resolve => {
-            let panel = $('.cg-ide-agents-management > .scroll-panel');
-            let batchButton = document.createElement('BUTTON');
-            batchButton.innerHTML = chrome.i18n.getMessage('btnBatchRun');
-            batchButton.setAttribute('id', 'cgspkBatchButton');
-            batchButton.style.padding = '5px 5px 5px 5px';
-            panel.append(batchButton);
+        return getAgentsScrollPanel()
+            .then(panel => {
+                if ($('#cgspkBatchButton').length > 0) return;
+                let batchButton = document.createElement('BUTTON');
+                batchButton.innerHTML = chrome.i18n.getMessage('btnBatchRun');
+                batchButton.setAttribute('id', 'cgspkBatchButton');
+                batchButton.style.padding = '5px 5px 5px 5px';
+                panel.append(batchButton);
 
-            $('#cgspkBatchButton').click(batchClicked);
-            resolve();
-        });
+                $('#cgspkBatchButton').click(batchClicked);
+            });
     }
 
     // public
     function createStopButton(stopClicked) {
-        return new Promise(resolve => {
-            let panel = $('.cg-ide-agents-management > .scroll-panel');
-            let stopButton = document.createElement('BUTTON');
-            stopButton.innerHTML = chrome.i18n.getMessage('btnStopBatch');
-            stopButton.setAttribute('id', 'cgspkStopBatchButton');
-            stopButton.style.padding = '5px 5px 5px 5px';
-            panel.append(stopButton);
+        return getAgentsScrollPanel()
+            .then(panel => {
+                if ($('#cgspkStopBatchButton').length > 0) return;
+                let stopButton = document.createElement('BUTTON');
+                stopButton.innerHTML = chrome.i18n.getMessage('btnStopBatch');
+                stopButton.setAttribute('id', 'cgspkStopBatchButton');
+                stopButton.style.padding = '5px 5px 5px 5px';
+                panel.append(stopButton);
 
-            $('#cgspkStopBatchButton').click(stopClicked);
-            $('#cgspkStopBatchButton').hide();
-            resolve();
-        });
+                $('#cgspkStopBatchButton').click(stopClicked);
+                $('#cgspkStopBatchButton').hide();
+            });
     }
 
     // public
@@ -139,8 +139,18 @@ var IdeDomManipulator =
 
     function getReplayUrl() {
         let href = $('.replay-button').attr('href');
-	if (href.startsWith('/replay')) href = 'http://www.codingame.com' + href;
-	return href;
+	    if (href.startsWith('/replay')) href = 'http://www.codingame.com' + href;
+	    return href;
+    }
+
+    function getAgentsScrollPanel() {
+        return new Promise(resolve => doGetAgentsScrollPanel(resolve));
+    }
+
+    function doGetAgentsScrollPanel(resolve) {
+        let panel = $('.cg-ide-agents-management > .scroll-panel');
+        if (panel.length > 0) resolve(panel);
+        else setTimeout(() => doGetAgentsScrollPanel(resolve), 200);
     }
 
     return new function() {

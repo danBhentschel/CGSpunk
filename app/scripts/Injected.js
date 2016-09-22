@@ -12,11 +12,11 @@
             }
         });
 
-        /*if (location.href.startsWith('https://www.codingame.com/ide/')) {
+        if (location.href.startsWith('https://www.codingame.com/ide/')) {
             sendMultiplayerMessageWhenLoaded();
         } else if (location.href.startsWith('https://www.codingame.com/replay/')) {
             sendReplayMessageWhenLoaded();
-        }*/
+        }
     });
 
     function sendMultiplayerMessageWhenLoaded() {
