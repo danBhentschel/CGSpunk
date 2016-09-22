@@ -257,7 +257,10 @@
             .then(allAgents => {
                 let range = parseInt(data.range, 10);
                 let myAgent = allAgents.find(_ => _.pseudo === data.name);
-                allAgents = allAgents.filter(_ => _.league.divisionIndex === myAgent.league.divisionIndex);
+                if (!!myAgent && !!myAgent.league) {
+                    allAgents = allAgents.filter(_ => _.league.divisionIndex === myAgent.league.divisionIndex);
+                }
+                if (!myAgent) myAgent = { rank: allAgents.length - 1 };
                 let low = Math.max(0, myAgent.rank - range);
                 let high = Math.min(allAgents.length - 1, myAgent.rank + range);
 
