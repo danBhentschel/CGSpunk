@@ -7,33 +7,37 @@
     "message": "A Chrome extension to enhance the CodinGame experience",
     "description": "The description of the application"
   },
-  "hdrRunNum": {
-    "message": "Run #",
-    "description": "Column header for the Batch Run results table"
-  },
   "tiedMatch": {
     "message": "Tie",
     "description": "Tied entry in Batch Run results table"
   },
-  "winsTitle": {
-    "message": "Wins:",
-    "description": "Wins title for Batch Run summary"
+  "swappedRun": {
+    "message": "$RUN_NUM$ (pos=$POSITION$)",
+    "description": "Title for swapped matches in the Batch Run results table",
+    "placeholders": {
+        "run_num": {
+            "content": "$1",
+            "example": "1"
+        },
+        "position": {
+            "content": "$2",
+            "example": "1"
+        }
+    }
   },
-  "lossesTitle": {
-    "message": "Losses:",
-    "description": "Losses title for Batch Run summary"
-  },
-  "tiesTitle": {
-    "message": "Ties:",
-    "description": "Ties title for Batch Run summary"
-  },
-  "hdrWinner": {
-    "message": "Winner",
-    "description": "Winner title for the Batch Run results table"
-  },
-  "hdrPlayers": {
-    "message": "Players",
-    "description": "Players title for the Batch Run results table"
+  "swappedIdeRun": {
+    "message": "$RUN_NUM$ (ide,pos=$POSITION$)",
+    "description": "Title for swapped IDE matches in the Batch Run results table",
+    "placeholders": {
+        "run_num": {
+            "content": "$1",
+            "example": "1"
+        },
+        "position": {
+            "content": "$2",
+            "example": "1"
+        }
+    }
   },
   "swappedArenaRun": {
     "message": "$RUN_NUM$ (arena,pos=$POSITION$)",
@@ -49,19 +53,29 @@
         }
     }
   },
-  "btnStderr": {
-    "message": "STDERR",
-    "description": "Link title for the Batch Run results table"
-  },
-  "swappedRun": {
-    "message": "$RUN_NUM$ (swapped)",
-    "description": "Title for swapped matches in the Batch Run results table",
+  "ideRun": {
+    "message": "$RUN_NUM$ (ide)",
+    "description": "Title for IDE matches in the Batch Run results table",
     "placeholders": {
         "run_num": {
             "content": "$1",
             "example": "1"
         }
     }
+  },
+  "arenaRun": {
+    "message": "$RUN_NUM$ (arena)",
+    "description": "Title for arena matches in the Batch Run results table",
+    "placeholders": {
+        "run_num": {
+            "content": "$1",
+            "example": "1"
+        }
+    }
+  },
+  "btnStderr": {
+    "message": "STDERR",
+    "description": "Link title for the Batch Run results table"
   },
   "replayBtnTip": {
     "message": "Replay this match",
