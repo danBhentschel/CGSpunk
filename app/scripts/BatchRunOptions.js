@@ -2,16 +2,17 @@ var BatchRunOptions =
 (function(dom) {
     'use strict';
 
-    function getRunParameters() {
+    function getRunParameters(inArena) {
         return dom.getNumPlayerSlots()
-            .then(getBatchRunOptions);
+            .then(slots => getBatchRunOptions(slots, inArena));
     }
 
-    function getBatchRunOptions(numPlayerSlots) {
+    function getBatchRunOptions(numPlayerSlots, inArena) {
         return new Promise(resolve =>
             chrome.runtime.sendMessage({
                 action: 'getBatchRunOptions',
-                numPlayerSlots: numPlayerSlots
+                numPlayerSlots: numPlayerSlots,
+                inArena: inArena
             }, options => resolve(options)));
     }
 

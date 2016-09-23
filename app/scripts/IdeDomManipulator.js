@@ -103,7 +103,7 @@ var IdeDomManipulator =
             options: getMatchOptions(),
             stderr: getMatchStderr(),
             crash: getCrashInfo(),
-	    replay: getReplayUrl()
+            replay: getReplayUrl()
         };
 
         rankedNames.each(function() {

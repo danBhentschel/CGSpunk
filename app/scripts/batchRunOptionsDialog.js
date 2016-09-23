@@ -2,11 +2,15 @@
 'use strict';
 
     var numPlayerSlots = 2;
+    var inArena = true;
 
     $(document).ready(() => {
         numPlayerSlots = parseInt(QueryStringHelper.getParameter(document.URL, 'numPlayerSlots'), 10);
+        inArena = QueryStringHelper.getParameter(document.URL, 'inArena') === 'true';
 
         loadSavedValuesFromStorage();
+
+        if (inArena) $('#divEnableArenaCode').show();
 
         $('#startRunButton').click(onStartRunButtonClicked);
 
@@ -18,6 +22,8 @@
         let options = readOptionsFromForm();
 
         chrome.storage.sync.set(options);
+
+        if (!inArena) options.arenaCodeEnabled = false;
 
         chrome.runtime.sendMessage({
             action: 'sendBatchOptionSelections',

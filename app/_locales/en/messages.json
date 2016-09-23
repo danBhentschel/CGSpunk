@@ -35,9 +35,19 @@
     "message": "Players",
     "description": "Players title for the Batch Run results table"
   },
-  "btnOptions": {
-    "message": "Options",
-    "description": "Link title for the Batch Run results table"
+  "swappedArenaRun": {
+    "message": "$RUN_NUM$ (arena,pos=$POSITION$)",
+    "description": "Title for swapped arena matches in the Batch Run results table",
+    "placeholders": {
+        "run_num": {
+            "content": "$1",
+            "example": "1"
+        },
+        "position": {
+            "content": "$2",
+            "example": "1"
+        }
+    }
   },
   "btnStderr": {
     "message": "STDERR",

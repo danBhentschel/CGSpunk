@@ -81,7 +81,8 @@ var IdeActions =
     }
 
     function batchRun() {
-        options.getRunParameters()
+        getCurrentUserArenaAgent()
+            .then(agent => options.getRunParameters(!!agent))
             .then(prepareBatchRun)
             .then(params => {
                 g_runContext = runner.runBatch(params, IdeActions);
@@ -223,7 +224,7 @@ var IdeActions =
             gameOptions: autoGameOptions ? '**auto' : '**manual',
             agents: players,
             type: type,
-            swap: swapNum
+            swapNum: swapNum
         };
     }
 

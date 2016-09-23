@@ -18,61 +18,52 @@ function addMatch(results, tabId) {
     g_matchNum = results.matches.length;
 
     let match = results.matches[g_matchNum-1]; 
-    let matchResults = match.results; 
-    let swapped = results.match.isMatchSwapped;
-    let runNum = results.runNum;
+    let iteration = match.iteration;
     let totalMatches = results.totalMatches
-    let userName = results.params.currentUserName;
+    let userName = results.userName;
 
-    if (g_matchNum === 1) populateHeaders(matchResults.rankings, results.params.swapEnabled);
+    if (g_matchNum === 1) showSummary(results);
     $('#numMatches').text(g_matchNum + ' / ' + totalMatches);
 
-    addRowToTable(matchResults, results.rollup.matchInfo, runNum, swapped, tabId);
+    addRowToTable(match, results, tabId);
     updateSummary(results.rollup, runNum, swapped, userName);
 }
 
-function populateHeaders(rankings, swapping) {
-    let header = '<tr>';
-    header += '<th><!-- Crash --></th>';
-    header += '<th><!-- Replay --></th>';
-    header += '<th><!-- Send to IDE --></th>';
-    header += '<th>' + chrome.i18n.getMessage('hdrRunNum') + '</th>';
-    header += '<th>' + chrome.i18n.getMessage('hdrPlayers') + '</th>';
-    header += '<th>' + chrome.i18n.getMessage('hdrWinner') + '</th>';
-    header += '<th><!-- STDERR --></th>';
-    header += '</tr>';
-    $('#resultsTableHead').append(header);
+function showSummary(results) {
+    if (results.swapEnabled) {
+        $('#hdrIdePosition1').show();
+        if (results.arenaCodeEnabled) $('#hdrArenaPosition1').show();
+        $('#divIdePosition2').show();
+        if (results.arenaCodeEnabled) $('#divArenaPosition2').show();
 
-    if (swapping) {
-        $('#summary').append('<div class="row">' +
-                             '<div class="col-xs-6" id="summaryDefault">' +
-                             '<h3>' + chrome.i18n.getMessage('defaultOrderLabel') + '</h3></div>' +
-                             '<div class="col-xs-6" id="summarySwapped">' +
-                             '<h3>' + chrome.i18n.getMessage('swappedOrderLabel') + '</h3></div>' +
-                             '</div>');
-    } else {
-        $('#summary').append('<div class="row"><div class="col-xs-12" id="summaryDefault"></div></div>');
+        if (results.numOpponents > 1) {
+            $('#ideExtraPositions').show();
+            if (results.arenaCodeEnabled) $('#arenaExtraPositions').show();
+            $('#divIdePosition3').show();
+            if (results.arenaCodeEnabled) $('#divArenaPosition3').show();
+        }
+
+        if (results.numOpponents > 2) {
+            $('#divIdePosition4').show();
+            if (results.arenaCodeEnabled) $('#divArenaPosition4').show();
+        }
     }
 
-    $('#summaryDefault').append('<h4>' + chrome.i18n.getMessage('winsTitle') + ' <span id="defaultWins">0</span></h4>');
-    $('#summaryDefault').append('<h4>' + chrome.i18n.getMessage('lossesTitle') + ' <span id="defaultLosses">0</span></h4>');
-    $('#summaryDefault').append('<h4>' + chrome.i18n.getMessage('tiesTitle') + ' <span id="defaultTies">0</span></h4>');
-
-    if (swapping) {
-        $('#summarySwapped').append('<h4>' + chrome.i18n.getMessage('winsTitle') + ' <span id="swappedWins">0</span></h4>');
-        $('#summarySwapped').append('<h4>' + chrome.i18n.getMessage('lossesTitle') + ' <span id="swappedLosses">0</span></h4>');
-        $('#summarySwapped').append('<h4>' + chrome.i18n.getMessage('tiesTitle') + ' <span id="swappedTies">0</span></h4>');
+    if (results.arenaCodeEnabled) {
+        $('#hdrIdeCode').show();
+        $('#arenaRow').show();
+        $('#hdrArenaCode').show();
     }
 }
 
-function addRowToTable(match, matchInfo, runNum, swapped, tabId) {
+function addRowToTable(match, results, tabId) {
     let row = '<tr>';
-    row += crashButtonCell(match);
+    row += crashButtonCell(match.results);
     row += replayButtonCell();
     row += sendToIdeButtonCell();
-    row += runLabelCell(swapped, runNum);
+    row += runLabelCell(match, results);
     row += playersLabelCell(match);
-    row += winnerLabelCell(matchInfo);
+    row += winnerLabelCell(match.results.rankings);
     row += stderrLinkCell();
     row += '</tr>';
 
@@ -82,10 +73,10 @@ function addRowToTable(match, matchInfo, runNum, swapped, tabId) {
     enableButtonTooltips();
 }
 
-function crashButtonCell(match) {
-    return '<td>' + (match.crash
+function crashButtonCell(matchResults) {
+    return '<td>' + (!!matchResults.crash
                ? '<button type="button" class="btn btn-danger" id="crashBtn' + g_matchNum + 
-                 '" data-toggle="tooltip" title="' + match.crash +
+                 '" data-toggle="tooltip" title="' + matchResults.crash +
                  '"><span class="glyphicon glyphicon-exclamation-sign" /></button>'
                : '') + '</td>';
 }
@@ -102,25 +93,50 @@ function sendToIdeButtonCell() {
            '"><span class="glyphicon glyphicon-share-alt" /></button></td>';
 }
 
-function runLabelCell(swapped, runNum) {
-    let runLabel = swapped ? chrome.i18n.getMessage('swappedRun', [ runNum ]) : runNum;
+function runLabelCell(match, results) {
+    let iteration = match.data.iteration + 1;
+    let swapNum = match.data.swapNum + 1;
+    let type = match.data.type;
+
+    let runLabel = iteration;
+    if (results.swapEnabled) {
+        if (results.arenaCodeEnabled && type === 'ide')
+            runLabel = chrome.i18n.getMessage('swappedIdeRun', [ iteration, swapNum ]);
+        else if (results.arenaCodeEnabled && type === 'arena')
+            runLabel = chrome.i18n.getMessage('swappedArenaRun', [ iteration, swapNum ]);
+        else if (!results.arenaCodeEnabled)
+            runLabel = chrome.i18n.getMessage('swappedRun', [ iteration, swapNum ]);
+
+    } else {
+        if (results.arenaCodeEnabled && type === 'ide')
+            runLabel = chrome.i18n.getMessage('ideRun', [ iteration ]);
+        else if (results.arenaCodeEnabled && type === 'arena')
+            runLabel = chrome.i18n.getMessage('arenaRun', [ iteration ]);
+    }
+
     return '<td>' + runLabel + '</td>';
 }
 
 function playersLabelCell(match) {
-    let players = match.rankings.map(_ => playerLabel(_, match));
+    let players = match.results.rankings.map(_ => playerLabel(_, match));
     return '<td>' + players.join('<br />') + '</td>';
 }
 
 function playerLabel(player, match) {
-    let agent = match.agents.find(_ => _.name === player.name);
-    if (agent && agent.agent.rank) return player.name + ' [' + agent.agent.rank + ']';
+    let agent = match.data.agents.find(_ => nameForAgent(_) === player.name);
+    if (agent && agent.rank) return player.name + ' [' + agent.rank + ']';
     return player.name;
 }
 
-function winnerLabelCell(matchInfo) {
-    if (matchInfo.tie) return '<td>' + chrome.i18n.getMessage('tiedMatch') + '</td>';
-    return '<td>' + matchInfo.winner + '</td>';
+function nameForAgent(agent) {
+    if (!!agent.pseudo) return agent.pseudo;
+    return agent.codingamer.pseudo;
+}
+
+function winnerLabelCell(rankings) {
+    let winners = rankings.filter(_ => _.rank === 1);
+    if (winners.length > 1) return '<td>' + chrome.i18n.getMessage('tiedMatch') + '</td>';
+    return '<td>' + winners[0].name + '</td>';
 }
 
 function stderrLinkCell() {
@@ -129,11 +145,11 @@ function stderrLinkCell() {
 }
 
 function addButtonEventHandlers(tbody, match, tabId) {
-    if (match.crash) {
+    if (match.results.crash) {
         tbody.on('click', '#crashBtn' + g_matchNum, () => {
             chrome.runtime.sendMessage({
                 action: 'showMatchCrashInfo',
-                crashInfo: match.crash
+                crashInfo: match.results.crash
             });
         });
     }
@@ -141,20 +157,20 @@ function addButtonEventHandlers(tbody, match, tabId) {
     tbody.on('click', '#sendToIdeBtn' + g_matchNum, () => {
         chrome.tabs.sendMessage(tabId, {
             action: 'sendToIde',
-            options: match.options,
-            agents: match.agents.map(_ => _.agent)
+            options: match.data.gameOptions,
+            agents: match.data.agents
         });
     });
 
     tbody.on('click', '#stderrBtn' + g_matchNum, () => {
         chrome.runtime.sendMessage({
             action: 'showMatchStderr',
-            stderr: match.stderr
+            stderr: match.results.stderr
         });
     });
 
     tbody.on('click', '#replayBtn' + g_matchNum, () => {
-	    window.open(match.replay);
+	    window.open(match.results.replay);
     });
 }
 
