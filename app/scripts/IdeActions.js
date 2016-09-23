@@ -76,6 +76,10 @@ var IdeActions =
         return sendMessageToInjectedScript({action:'addAgent', data: {index: index, agent: agent}});
     }
 
+    function addAgents(agents) {
+        return sendMessageToInjectedScript({action:'addAgents', data: {agents: agents}});
+    }
+
     function batchRun() {
         options.getRunParameters()
             .then(prepareBatchRun)
@@ -85,14 +89,50 @@ var IdeActions =
     }
 
     function prepareBatchRun(params) {
-        return getCurrentUserName()
-            .then(name => {
-                return ensureCurrentUserIsFirst(name)
-                    .then(() => getAgentsAroundAgent(name, params.opponentSelectionRange))
-                    .then(agents => {
-                        params.candidateAgents = agents;
-                        return params;
+        return addMyAgentsToRunData({}, params)
+            .then(runData => addAgentsAroundMeToRunData(runData, params))
+            .then(runData => addCurrentPlayersToRunData(runData, params))
+            .then(runData => {
+                params.initialAgents = runData.currentPlayers;
+                return runData;
+            })
+            .then(runData => addMatchesToParams(runData, params));
+    }
+
+    function addMyAgentsToRunData(runData, params) {
+        return getCurrentUserArenaAgent()
+            .then(agent => {
+                runData.myAgents = { arena: agent };
+                if (!!agent) {
+                    runData.myAgents.ide = ideAgent(agent.pseudo);
+                    return runData;
+                }
+
+                return getCurrentUserName()
+                    .then(name => {
+                        runData.myAgents.ide = ideAgent(name);
+                        return runData;
                     });
+            });
+    }
+
+    function ideAgent(name) {
+        return {
+            agentId: -1,
+            pseudo: name,
+            specialAgent: true
+        };
+    }
+
+    function addAgentsAroundMeToRunData(runData, params) {
+        if (params.opponentSelectionType !== 'range')
+            return new Promise(resolve => resolve(runData));
+
+        return getCurrentUserName()
+            .then(name => getAgentsAroundAgent(name, params.opponentSelectionRange))
+            .then(agents => {
+                runData.candidateAgents = agents;
+                return runData;
             });
     }
 
@@ -100,14 +140,91 @@ var IdeActions =
         return getCurrentUser().then(user => { return user.pseudo; });
     }
 
-    function ensureCurrentUserIsFirst(name) {
+    function addCurrentPlayersToRunData(runData, params) {
         return getAgentsData()
             .then(agents => {
-                if (agents[0].name === name) return;
-                if (agents[1].name === name) return rotateAgents();
-                return getCurrentUserArenaAgent()
-                    .then(agent => addAgent(agent, 0));
+                runData.currentPlayers = agents.map(_ => _.agent);
+                return runData;
             });
+    }
+
+    function addMatchesToParams(runData, params) {
+        let matches = [];
+
+        for (let i = 0; i < params.iterations; i++)
+            matches = addMatchesForIteration(matches, i, runData, params);
+
+        params.matches = matches;
+
+        return params;
+    }
+
+    function addMatchesForIteration(matches, iteration, runData, params) {
+        let opponents = params.opponentSelectionType === 'current'
+            ? getCurrentOpponents(runData)
+            : getRandomOpponents(runData, params.numOpponents);
+
+        let players = opponents.slice(0);
+        let ide = runData.myAgents.ide;
+        let swapNum = 0;
+        let autoGameOptions = true;
+        players.splice(0, 0, ide);
+        do {
+            matches.push(newMatch(players, autoGameOptions, 'ide', swapNum, iteration));
+            autoGameOptions = false;
+            players = players.slice(0);
+            players.unshift(players.pop());
+            swapNum++;
+        } while (params.swapEnabled &&
+                 players[0].pseudo != ide.pseudo);
+
+        if (!params.arenaCodeEnabled) return matches;
+
+        players = opponents.slice(0);
+        swapNum = 0;
+        players.splice(0, 0, runData.myAgents.arena);
+        do {
+            matches.push(newMatch(players, false, 'arena', swapNum, iteration));
+            players = players.slice(0);
+            players.unshift(players.pop());
+            swapNum++;
+        } while (params.swapEnabled &&
+                 players[0].pseudo != ide.pseudo);
+
+        return matches;
+    }
+
+    function getCurrentOpponents(runData) {
+        let me = runData.myAgents.ide.pseudo;
+        return runData.currentPlayers.filter(player => isNotMe(player, me));
+    }
+
+    function isNotMe(player, me) {
+        if (player.pseudo === me) return false;
+        if (!player.codingamer) return true;
+        return player.codingamer.pseudo !== me;
+    }
+
+    function getRandomOpponents(runData, num) {
+        let opponents = [];
+        for (let i = 0; i < num; i++)
+            opponents.push(getRandomOpponent(runData.candidateAgents));
+
+        return opponents;
+    }
+
+    function getRandomOpponent(candidates) {
+        return candidates[Math.floor(Math.random() * candidates.length)]
+    }
+
+    function newMatch(players, autoGameOptions, type, swapNum, iteration) {
+        return {
+            iteration: iteration,
+            gameOptions: autoGameOptions ? '**auto' : '**manual',
+            agents: players,
+            type: type,
+            swap: swapNum
+        };
     }
 
     function stopBatch() {
@@ -128,5 +245,6 @@ var IdeActions =
         actions.sendToIde = sendToIde;
         actions.getCurrentUser = getCurrentUser;
         actions.addAgent = addAgent;
+        actions.addAgents = addAgents;
     };
 })(BatchRunOptions, BatchRunner);

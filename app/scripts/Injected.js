@@ -59,6 +59,7 @@
         if (data.action === 'getCurrentUser') getCurrentUser();
         if (data.action === 'getCurrentUserArenaAgent') getCurrentUserArenaAgent();
         if (data.action === 'addAgent') addAgent(data.data);
+        if (data.action === 'addAgents') addAgents(data.data);
         if (data.action === 'setPlaybackFrame') setPlaybackFrame(data.data);
     }, false);
 
@@ -250,10 +251,7 @@
     }
 
     function getAgentsAroundAgent(data) {
-        let scope = getScopesForAgents()[0];
-        let leaderboard = scope.api.getLeaderboard();
-
-        waitForLeaderboardToBePopulated(leaderboard)
+        waitForLeaderboardToBePopulated(getLeaderboard())
             .then(allAgents => {
                 let range = parseInt(data.range, 10);
                 let myAgent = allAgents.find(_ => _.pseudo === data.name);
@@ -276,6 +274,11 @@
             .then(agents => window.postMessage({action:'getAgentsAroundAgentComplete', result: agents}, '*'));
     }
 
+    function getLeaderboard() {
+        let scope = getScopesForAgents()[0];
+        return scope.api.getLeaderboard();
+    }
+
     function waitForLeaderboardToBePopulated(leaderboard) {
         return new Promise(resolve => doWaitForLeaderboardToBePopulated(leaderboard, resolve));
     }
@@ -289,14 +292,21 @@
     }
 
     function getCurrentUser() {
-        let user = angular.element('.avatar').injector().get('codinGamerService').codinGamer;
-        window.postMessage({action:'getCurrentUserComplete', result: user}, '*');
+        window.postMessage({action:'getCurrentUserComplete', result: getUserFromService()}, '*');
+    }
+
+    function getUserFromService() {
+        return angular.element('.avatar').injector().get('codinGamerService').codinGamer;
     }
 
     function getCurrentUserArenaAgent() {
-        let agent = angular.element('.agent').scope().api.arena.userRank;
-        agent.specialAgent = true;
-        window.postMessage({action:'getCurrentUserArenaAgentComplete', result: agent}, '*');
+        let me = getUserFromService().pseudo;
+
+        waitForLeaderboardToBePopulated(getLeaderboard())
+            .then(allAgents => {
+                let myAgent = allAgents.find(_ => _.pseudo === me);
+                window.postMessage({action:'getCurrentUserArenaAgentComplete', result: myAgent}, '*');
+            });
     }
 
     function addAgent(addInfo) {
@@ -307,6 +317,22 @@
         scopes[index].api.addAgent(agent, index);
         scopes[index].$apply();
         window.postMessage({action:'addAgentComplete'}, '*');
+    }
+
+    function addAgents(addInfo) {
+        let agents = addInfo.agents;
+
+        let scopes = getScopesForAgents();
+        for (let i = 0; i < scopes.length; i++) {
+            if (i >= agents.length) {
+                scopes[i].api.removeAgent(i);
+            } else {
+                scopes[i].api.addAgent(agents[i], i);
+                scopes[i].$apply();
+            }
+        }
+
+        window.postMessage({action:'addAgentsComplete'}, '*');
     }
 
     if (!angular.isDefined(angular.element('#content').scope()))

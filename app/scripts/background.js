@@ -5,7 +5,7 @@ var g_optionsResponseFunc;
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === 'getBatchRunOptions') {
         g_optionsResponseFunc = sendResponse;
-        showBatchRunOptionsWindow(sender.tab.id);
+        showBatchRunOptionsWindow(request.numPlayerSlots);
         return true;
     } else if (request.action === 'sendBatchOptionSelections') {
         g_optionsResponseFunc(request.options);
@@ -22,9 +22,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     }
 });
 
-function showBatchRunOptionsWindow(tabId) {
+function showBatchRunOptionsWindow(numPlayerSlots) {
     chrome.windows.create({
-        url: 'dialogs/batchRunOptions.html?tabId=' + tabId,
+        url: 'dialogs/batchRunOptions.html?numPlayerSlots=' + numPlayerSlots,
         type: 'popup',
         width: 600,
         height: 600

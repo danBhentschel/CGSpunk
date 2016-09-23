@@ -80,6 +80,12 @@ var IdeDomManipulator =
         });
     }
 
+    // public
+    function getNumPlayerSlots() {
+        return new Promise(resolve => resolve($('.agent').length));
+    }
+    
+
     // ***************** All private after here ****************
 
     function waitForResults(resolve) {
@@ -165,5 +171,6 @@ var IdeDomManipulator =
         // Batch methods
         manipulator.clickPlayButton = clickPlayButton;
         manipulator.getResultsOfMatch = getResultsOfMatch;
+        manipulator.getNumPlayerSlots = getNumPlayerSlots;
     };
 })(DomUtils);

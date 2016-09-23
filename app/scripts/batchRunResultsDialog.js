@@ -11,13 +11,14 @@ chrome.runtime.onMessage.addListener((request, sender) => {
 });
 
 function addMatch(results, tabId) {
-    if (g_batchNum === -1) g_batchNum = results.params.batchNum;
-    if (g_instanceNum != results.params.instanceNum) return;
-    if (g_batchNum != results.params.batchNum) return;
+    if (g_batchNum === -1) g_batchNum = results.batchNum;
+    if (g_instanceNum != results.instanceNum) return;
+    if (g_batchNum != results.batchNum) return;
 
-    g_matchNum = results.matchNum;
+    g_matchNum = results.matches.length;
 
-    let matchResults = results.match.matchResults; 
+    let match = results.matches[g_matchNum-1]; 
+    let matchResults = match.results; 
     let swapped = results.match.isMatchSwapped;
     let runNum = results.runNum;
     let totalMatches = results.totalMatches

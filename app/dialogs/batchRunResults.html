@@ -8,6 +8,15 @@
 <script src="../bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
 <script src="../scripts/QueryStringHelper.js"></script>
 <script src="../scripts/batchRunResultsDialog.js"></script>
+<style type="text/css">
+.h-line{
+ margin-top:5px;
+ margin-bottom:5px;
+ height:1px;
+ width:100%;
+ border-top:2px solid #cccccc;
+}
+</style>
 </head>
 <body>
 
@@ -15,23 +24,28 @@
 <div class="container">
     <h1>Batch run results</h1>
 
-    <div class="row"><div class="col-xs-12">
-        <div class="well" id="summary">
-            <div class="row"><div class="col-xs-12">
-                    <h3>Matches: <span id="numMatches">0</span></h3>
-            </div></div>
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="well" id="summary">
+                <div class="row">
+                    <div class="col-xs-12">
+                        <h3>Matches: <span id="numMatches">0</span></h3>
+                        <div class="h-line"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="well">
+                <div class="row"><div class="col-xs-12">
+                    <table class="table table-striped" id="resultsTable">
+                        <thead id="resultsTableHead">
+                        </thead>
+                        <tbody id="resultsTableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
-        <div class="well">
-            <div class="row"><div class="col-xs-12">
-                <table class="table table-striped" id="resultsTable">
-                    <thead id="resultsTableHead">
-                    </thead>
-                    <tbody id="resultsTableBody">
-                    </tbody>
-                </table>
-            </div></div>
-        </div>
-    </div></div
+    </div>
 </div>
 
 

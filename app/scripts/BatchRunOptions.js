@@ -1,11 +1,18 @@
 var BatchRunOptions =
-(function() {
+(function(dom) {
     'use strict';
 
     function getRunParameters() {
-        return new Promise(resolve => {
-            chrome.runtime.sendMessage({ action: 'getBatchRunOptions' }, options => resolve(options));
-        });
+        return dom.getNumPlayerSlots()
+            .then(getBatchRunOptions);
+    }
+
+    function getBatchRunOptions(numPlayerSlots) {
+        return new Promise(resolve =>
+            chrome.runtime.sendMessage({
+                action: 'getBatchRunOptions',
+                numPlayerSlots: numPlayerSlots
+            }, options => resolve(options)));
     }
 
     return new function() {
@@ -13,4 +20,4 @@ var BatchRunOptions =
 
         options.getRunParameters = getRunParameters;
     };
-})();
+})(IdeDomManipulator);

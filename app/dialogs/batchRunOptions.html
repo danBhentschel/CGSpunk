@@ -23,12 +23,17 @@
     </div>
     <div class="checkbox">
         <label>
-            <input type="checkbox" id="enableSwap" /> Perform each iteration a second time with positions swapped
+            <input type="checkbox" id="enableSwap" /> Perform each iteration with player positions swapped
+        </label>
+    </div>
+    <div class="checkbox">
+        <label>
+            <input type="checkbox" id="enableArenaCode" /> Perform each iteration with both IDE code and Arena code
         </label>
     </div>
 
     <fieldset class="form-group">
-        <legend>Opponent(s)</legend>
+        <legend>Opponent selection</legend>
         <div class="form-group">
             <ul class="nav nav-pills nav-stacked" id="opponentSelectionType">
                 <li class="active"><a href="" data-toggle="pill" id="opponentCurrent">Use the current opponent in the IDE</a></li>
@@ -36,17 +41,30 @@
             </ul>
         </div>
 
-        <div id="opponentSelectRange" class="collapse form-group">
-            <label for="selectRange">Range size:</label>
-            <select class="form-control" id="selectRange">
-                <option>1</option>
-                <option>2</option>
-                <option>5</option>
-                <option>10</option>
-                <option>25</option>
-                <option>50</option>
-                <option>100</option>
-            </select>
+        <div id="opponentSelectOptions" class="collapse form-group">
+            <div class="form-group" id="numOpponentsSection">
+                <label for="numOpponents">Number of opponent players:</label>
+                <div class="form-group">
+                    <ul class="nav nav-pills" id="numOpponents">
+                        <li class="active"><a href="" data-toggle="pill" id="numOpponents1">1</a></li>
+                        <li><a href="" data-toggle="pill" id="numOpponents2">2</a></li>
+                        <li><a href="" data-toggle="pill" id="numOpponents3">3</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="form-group" id="opponentSelectRange">
+                <label for="selectRange">Range size:</label>
+                <select class="form-control" id="selectRange">
+                    <option>1</option>
+                    <option>2</option>
+                    <option>5</option>
+                    <option>10</option>
+                    <option>25</option>
+                    <option>50</option>
+                    <option>100</option>
+                </select>
+            </div>
         </div>
     </fieldset>
 

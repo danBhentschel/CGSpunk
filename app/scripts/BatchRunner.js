@@ -8,89 +8,53 @@ var BatchRunner =
         dom.toggleBatchButtons();
         chrome.runtime.sendMessage({action:'showResultsWindow', instanceNum: g_instanceNum});
 
-        let context = {
-            params: params,
-            ideActions: ideActions,
-            results: recorder.createNew(params),
-            iteration: 1,
-            swapped: false,
-            stop: false
-        };
-
         params.instanceNum = g_instanceNum;
         params.batchNum = g_batchNum;
         g_batchNum++;
 
-        ideActions.getCurrentUser()
-            .then(user => {
-                params.currentUserName = user.pseudo;
-                doIteration(context);
-            });
+        let context = {
+            params: params,
+            ideActions: ideActions,
+            results: recorder.createNew(params),
+            matchNum: 0,
+            matches: params.matches,
+            stop: false
+        };
+
+        doMatch(context);
 
         return context;
     }
 
-    function doIteration(context) {
-        if (context.iteration > context.params.iterations || context.stop) {
+    function doMatch(context) {
+        if (context.matchNum > context.matches.length-1 || context.stop) {
             dom.toggleBatchButtons();
+            context.ideActions.addAgents(context.params.initialAgents);
             return;
         }
 
-        selectNextOpponent(context)
+        setupMatch(context)
             .then(context.ideActions.playMatch)
             .then(context.ideActions.stopPlayback)
             .then(dom.getResultsOfMatch)
-            .then(results => addAgentsInfoToResults(context.ideActions, results))
             .then(results => {
-                let match = prepareMatchResults(context, results);
-                context.results = recorder.recordMatch(match, context.results, context.params);
-                reporter.reportMatch(match, context.results, context.params);
-                doNextIteration(context);
+                let match = context.matches[context.matchNum];
+                match.gameOptions = results.options;
+                context.results = recorder.recordMatch(context.results, match, results);
+                reporter.reportMatch(context.results);
+                context.matchNum++;
+                doMatch(context);
             });
     }
 
-    function addAgentsInfoToResults(ideActions, results) {
-        return ideActions.getAgentsData()
-            .then(agents => {
-                results.agents = agents;
-                return results;
-            });
-    }
+    function setupMatch(context) {
+        let match = context.matches[context.matchNum];
+        let setGameOptions = match.gameOptions === '**auto'
+            ? context.ideActions.setGameOptionsToAuto
+            : context.ideActions.setGameOptionsToManual;
 
-    function prepareMatchResults(context, results) {
-        return {
-            matchResults: results,
-            isMatchSwapped: context.swapped
-        };
-    }
-
-    function doNextIteration(context) {
-        if (context.params.swapEnabled && !context.swapped) {
-            context.swapped = true;
-            context.ideActions.rotateAgents()
-                .then(context.ideActions.setGameOptionsToManual)
-                .then(() => doIteration(context));
-        } else {
-            context.iteration++;
-            if (context.iteration > 1 && context.params.swapEnabled) {
-                context.swapped = false;
-                context.ideActions.rotateAgents()
-                    .then(context.ideActions.setGameOptionsToAuto)
-                    .then(() => doIteration(context));
-            } else {
-                context.ideActions.setGameOptionsToAuto()
-                    .then(() => doIteration(context));
-            }
-        }
-    }
-
-    function selectNextOpponent(context) {
-        if (context.params.opponentSelectionType !== 'range') return new Promise(resolve => resolve());
-        if (context.params.swapEnabled && context.swapped) return new Promise(resolve => resolve());
-        let candidates = context.params.candidateAgents;
-        let numCandidates = candidates.length;
-        let opponent = candidates[Math.floor(Math.random() * numCandidates)];
-        return context.ideActions.addAgent(opponent, 1);
+        return context.ideActions.addAgents(match.agents)
+            .then(setGameOptions);
     }
 
     function stopBatch(context) {
