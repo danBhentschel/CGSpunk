@@ -20,13 +20,12 @@ function addMatch(results, tabId) {
     let match = results.matches[g_matchNum-1]; 
     let iteration = match.iteration;
     let totalMatches = results.totalMatches
-    let userName = results.userName;
 
     if (g_matchNum === 1) showSummary(results);
     $('#numMatches').text(g_matchNum + ' / ' + totalMatches);
 
     addRowToTable(match, results, tabId);
-    updateSummary(results.rollup, runNum, swapped, userName);
+    updateSummary(results);
 }
 
 function showSummary(results) {
@@ -134,9 +133,13 @@ function nameForAgent(agent) {
 }
 
 function winnerLabelCell(rankings) {
-    let winners = rankings.filter(_ => _.rank === 1);
+    let winners = getWinnersForRankings(rankings);
     if (winners.length > 1) return '<td>' + chrome.i18n.getMessage('tiedMatch') + '</td>';
     return '<td>' + winners[0].name + '</td>';
+}
+
+function getWinnersForRankings(rankings) {
+    return rankings.filter(_ => _.rank === 1);
 }
 
 function stderrLinkCell() {
@@ -184,26 +187,60 @@ function findEntryByName(rankings, name) {
     return rankings.find(_ => _.name === name);
 }
 
-function updateSummary(results, runNum, swapped, userName) {
-    let section = results.defaultOrder;
-    let winsId = '#defaultWins';
-    let lossesId = '#defaultLosses';
-    let tiesId = '#defaultTies';
-    if (swapped) {
-        section = results.swappedOrder;
-        winsId = '#swappedWins';
-        lossesId = '#swappedLosses';
-        tiesId = '#swappedTies';
-    }
+function updateSummary(results) {
+    let swapEnabled = results.swapEnabled;
+    let arenaEnabled = results.arenaCodeEnabled;
+    let numOpponents = results.numOpponents;
+    let userName = results.userName;
+    let matches = results.matches.map(_ => calcMatchInfo(_, userName));
 
-    $(winsId).text(section.wins[userName]);
-    $(lossesId).text(runNum - section.wins[userName]);
-    $(tiesId).text(section.ties);
+    let match = matches[matches.length-1];
+    let swapNum = match.swapNum;
+    let type = match.type;
+
+    let typeId = type === 'ide'
+        ? 'Ide' : (type === 'arena' ? 'Arena' : '');
+    let fieldId = typeId + 'Position' + (swapNum+1);
+    let winsId = '#wins' + fieldId;
+    let lossesId = '#losses' + fieldId;
+    let tiesId = '#ties' + fieldId;
+
+    let wins = findMatchesOfStatus(matches, swapNum, type, 'w').length;
+    let losses = findMatchesOfStatus(matches, swapNum, type, 'l').length;
+    let ties = findMatchesOfStatus(matches, swapNum, type, 't').length;
+
+    $(winsId).text(wins);
+    $(lossesId).text(losses);
+    $(tiesId).text(ties);
 
     if (swapped) addSignificantRuns(results);
 }
 
+function calcMatchInfo(match, userName) {
+    return {
+        iteration: match.data.iteration,
+        swapNum: match.data.swapNum,
+        type: match.data.type,
+        status: calcMatchStatus(match, userName)
+    };
+}
+
+function calcMatchStatus(match, userName) {
+    let rankings = match.results.rankings;
+    let winners = getWinnersForRankings(rankings);
+
+    if (winners.length === 1) return winners[0].name === userName ? 'w' : 'l';
+    return winners.filter(_ => _.name === userName).length ? 't' : 'l';
+}
+
+function findMatchesOfStatus(matches, swapNum, type, status) {
+    return matches.filter(_ => _.swapNum === swapNum  &&
+                               _.type === type &&
+                               _.status === status);
+}
+
 function addSignificantRuns(results) {
+    
     let runNum = results.defaultOrder.runs.length;
     let significant = false;
     let defaultRankings = rankingsForRun(results.defaultOrder, runNum);
@@ -225,8 +262,4 @@ function addSignificantRuns(results) {
     } else {
         $('#significantRuns').append(', ' + runNum);
     }
-}
-
-function rankingsForRun(section, runNum) {
-    return section.runs[runNum-1].matchResults.rankings;
 }
