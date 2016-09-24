@@ -188,9 +188,6 @@ function findEntryByName(rankings, name) {
 }
 
 function updateSummary(results) {
-    let swapEnabled = results.swapEnabled;
-    let arenaEnabled = results.arenaCodeEnabled;
-    let numOpponents = results.numOpponents;
     let userName = results.userName;
     let matches = results.matches.map(_ => calcMatchInfo(_, userName));
 
@@ -213,7 +210,8 @@ function updateSummary(results) {
     $(lossesId).text(losses);
     $(tiesId).text(ties);
 
-    if (swapped) addSignificantRuns(results);
+    addSwapSignificantRuns(results, matches);
+    addCodeSignificantRuns(results, matches);
 }
 
 function calcMatchInfo(match, userName) {
@@ -239,27 +237,52 @@ function findMatchesOfStatus(matches, swapNum, type, status) {
                                _.status === status);
 }
 
-function addSignificantRuns(results) {
-    
-    let runNum = results.defaultOrder.runs.length;
-    let significant = false;
-    let defaultRankings = rankingsForRun(results.defaultOrder, runNum);
-    let swappedRankings = rankingsForRun(results.swappedOrder, runNum);
+function addSwapSignificantRuns(results, matches) {
+    if (!results.swapEnabled) return;
 
-    swappedRankings.forEach(ranking => {
-        if (significant || ranking.rank != 1) return;
-        let defaultRanking = findEntryByName(defaultRankings, ranking.name);
-        if (defaultRanking.rank != 1) significant = true;
-    });
+    let match = matches[matches.length-1];
+    if (match.swapNum !== results.numOpponents) return;
 
-    if (!significant) return;
+    let iterations = match.iteration;
+    let type = match.type;
 
-    if ($('#significantRuns').length === 0) {
-        $('#summary').append('<div class="row"><div class="col-xs-12">' +
-                             '<h3>' + chrome.i18n.getMessage('significantRunsLabel') + '</h3>' +
-                             '<h4 id="significantRuns">' + runNum + '</h4>' +
-                             '</div></div>');
-    } else {
-        $('#significantRuns').append(', ' + runNum);
+    let significant = [];
+    for (let i = 0; i <= iterations; i++) {
+        let isSignificant = matches.filter(_ => _.iteration == i &&
+                                                _.type === type)
+            .reduce((status, _) => status === null
+                    ? _.status : (status === _.status ? status : 'x'), null)
+            == 'x';
+        if (isSignificant) significant.push(i+1);
     }
+
+    if (!significant.length) return;
+
+    $('#' + type + 'SignificantRuns').show();
+    $('#' + type + 'SignificantRunsVal').text(significant.join(', '));
+}
+
+function addCodeSignificantRuns(results, matches) {
+    if (!results.arenaCodeEnabled) return;
+
+    let match = matches[matches.length-1];
+    if (match.type !== 'arena') return;
+
+    let iteration = match.iteration;
+    let swapNum = match.swapNum;
+
+    let isSignificant = matches.filter(_ => _.iteration == iteration &&
+                                            _.swapNum == swapNum)
+        .reduce((status, _) => status === null
+                ? _.status : (status === _.status ? status : 'x'), null)
+        == 'x';
+
+    if (!isSignificant) return;
+
+    $('#codeSignificantRuns').show();
+    let val = $('#codeSignificantRunsVal').text();
+    if (val.length) val += ', ';
+    val = val + (iteration+1);
+    if (results.swapEnabled) val += ' (pos: ' + (swapNum+1) + ')';
+    $('#codeSignificantRunsVal').text(val);
 }
