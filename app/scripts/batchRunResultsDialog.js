@@ -132,7 +132,8 @@ function playerLabel(player, match) {
 function nameForAgent(agent) {
     if (!!agent.pseudo) return agent.pseudo;
     if (!!agent.arenaboss) return agent.arenaboss.nickname;
-    return agent.codingamer.pseudo;
+    if (!!agent.codingamer) return agent.codingamer.pseudo;
+    return 'Default';
 }
 
 function winnerLabelCell(rankings) {
