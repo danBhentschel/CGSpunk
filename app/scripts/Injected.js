@@ -51,6 +51,7 @@
         let data = event.data;
         if (data.action === 'rotateAgents') rotateAgents();
         if (data.action === 'setGameOptionsManual') setGameOptionsManual(data.data);
+        if (data.action === 'setGameOptionsText') setGameOptionsText(data.data);
         if (data.action === 'playMatch') playMatch();
         if (data.action === 'stopPlayback') stopPlayback();
         if (data.action === 'getAgentsData') getAgentsData();
@@ -130,6 +131,31 @@
             resolve();
         } else {
             setTimeout(() => doWaitForGameOptionsManual(resolve, value), 10);
+        }
+    }
+
+    function setGameOptionsText(value) {
+        doSetGameOptionsText(value)
+            .then(() => window.postMessage({action:'setGameOptionsTextComplete'}, '*'));
+    }
+
+    function doSetGameOptionsText(value) {
+        let scope = angular.element('.cg-ide-game-options-editor').scope();
+        scope.apis.gameOptions.gameOptions = value;
+        scope.$apply();
+
+        return waitForGameOptionsText(value);
+    }
+
+    function waitForGameOptionsText(value) {
+        return new Promise(resolve => doWaitForGameOptionsText(resolve, value));
+    }
+
+    function doWaitForGameOptionsText(resolve, value) {
+        if (angular.element('.options-text').val() === value) {
+            resolve();
+        } else {
+            setTimeout(() => doWaitForGameOptionsText(resolve, value), 10);
         }
     }
 
@@ -241,12 +267,16 @@
     function sendToIde(state) {
         let scopes = getScopesForAgents();
         for (let i = 0; i < scopes.length; i++) {
-            scopes[i].api.addAgent(state.agents[i], i);
+            if (i >= state.agents.length) {
+                scopes[i].api.removeAgent(i);
+            } else {
+                scopes[i].api.addAgent(state.agents[i], i);
+            }
             scopes[i].$apply();
         }
 
         doSetGameOptionsManual(true)
-            .then(() => angular.element('.options-text').val(state.options))
+            .then(() => doSetGameOptionsText(state.options))
             .then(() => window.postMessage({action:'sendToIdeComplete'}, '*'));
     }
 
@@ -328,8 +358,8 @@
                 scopes[i].api.removeAgent(i);
             } else {
                 scopes[i].api.addAgent(agents[i], i);
-                scopes[i].$apply();
             }
+            scopes[i].$apply();
         }
 
         window.postMessage({action:'addAgentsComplete'}, '*');

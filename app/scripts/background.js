@@ -15,10 +15,14 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         showStderrWindow(request.stderr);
     } else if (request.action === 'showMatchCrashInfo') {
         showCrashInfoWindow(request.crashInfo);
+    } else if (request.action === 'showBatchData') {
+        showBatchDataWindow(request.data);
     } else if (request.action === 'getLastStderr') {
         sendResponse(g_lastStderr);
     } else if (request.action === 'getLastCrashInfo') {
         sendResponse(g_lastCrashInfo);
+    } else if (request.action === 'getLastBatchData') {
+        sendResponse(g_lastBatchData);
     }
 });
 
@@ -28,7 +32,7 @@ function showBatchRunOptionsWindow(numPlayerSlots, inArena) {
              '&inArena=' + inArena,
         type: 'popup',
         width: 600,
-        height: 600
+        height: 700
     });
 }
 
@@ -62,5 +66,17 @@ function showCrashInfoWindow(info) {
         type: 'popup',
         width: 600,
         height: 600
+    });
+}
+
+var g_lastBatchData;
+
+function showBatchDataWindow(data) {
+    g_lastBatchData = data;
+    chrome.windows.create({
+        url: 'dialogs/batchData.html',
+        type: 'popup',
+        width: 700,
+        height: 700
     });
 }

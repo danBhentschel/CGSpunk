@@ -26,6 +26,8 @@ function addMatch(results, tabId) {
 
     addRowToTable(match, results, tabId);
     updateSummary(results);
+
+    if (g_matchNum === totalMatches) showBatchButton(results);
 }
 
 function showSummary(results) {
@@ -129,6 +131,7 @@ function playerLabel(player, match) {
 
 function nameForAgent(agent) {
     if (!!agent.pseudo) return agent.pseudo;
+    if (!!agent.arenaboss) return agent.arenaboss.nickname;
     return agent.codingamer.pseudo;
 }
 
@@ -283,6 +286,67 @@ function addCodeSignificantRuns(results, matches) {
     let val = $('#codeSignificantRunsVal').text();
     if (val.length) val += ', ';
     val = val + (iteration+1);
-    if (results.swapEnabled) val += ' (pos: ' + (swapNum+1) + ')';
+    if (results.swapEnabled) val += ' (pos=' + (swapNum+1) + ')';
     $('#codeSignificantRunsVal').text(val);
+}
+
+function showBatchButton(results) {
+    let button = $('#divBatchBtn');
+
+    button.css('margin-top', button.parent().height() - button.height())
+    button.show();
+
+    button.on('click', '#batchBtn', () => {
+        chrome.runtime.sendMessage({
+            action: 'showBatchData',
+            data: {
+                swapEnabled: results.swapEnabled,
+                arenaCodeEnabled: results.arenaCodeEnabled,
+                numOpponents: results.numOpponents,
+                matches: results.matches.map(prepareBatchData)
+            }
+        });
+    });
+}
+
+function prepareBatchData(match) {
+    let agents = match.data.agents.map(prepareBatchAgent);
+    let data = JSON.parse(JSON.stringify(match.data));
+    data.agents = agents;
+    return data;
+}
+
+function prepareBatchAgent(agent) {
+    if (!!agent.arenaboss) return prepareBatchBoss(agent);
+
+    let pseudo = nameForAgent(agent);
+    let shrunken = {
+        agentId: agent.agentId,
+        pseudo: pseudo
+    };
+
+    if (!!agent.codingamer) {
+        shrunken.codingamer = {
+            pseudo: pseudo,
+            avatar: agent.codingamer.avatar
+        };
+    } else {
+        shrunken.codingamer = null;
+    }
+
+    if (typeof agent.specialAgent !== 'undefined')
+        shrunken.specialAgent = agent.specialAgent;
+
+    return shrunken;
+}
+
+function prepareBatchBoss(agent) {
+    return {
+        agentId: agent.agentId,
+        arenaBoss: {
+            arenabossId: agent.arenaboss.arenabossId,
+            nickname: agent.arenaboss.nickname
+        },
+        codingamer: null
+    };
 }

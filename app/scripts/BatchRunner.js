@@ -51,7 +51,9 @@ var BatchRunner =
         let match = context.matches[context.matchNum];
         let setGameOptions = match.gameOptions === '**auto'
             ? context.ideActions.setGameOptionsToAuto
-            : context.ideActions.setGameOptionsToManual;
+            : (match.gameOptions === '**manual'
+                ? context.ideActions.setGameOptionsToManual
+                : () => context.ideActions.setGameOptionsText(match.gameOptions));
 
         return context.ideActions.addAgents(match.agents)
             .then(setGameOptions);

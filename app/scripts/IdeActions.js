@@ -44,6 +44,10 @@ var IdeActions =
         return sendMessageToInjectedScript({action:'setGameOptionsManual', data: value});
     }
 
+    function setGameOptionsText(value) {
+        return sendMessageToInjectedScript({action:'setGameOptionsText', data: value});
+    }
+
     function stopPlayback() {
         return sendMessageToInjectedScript({action:'stopPlayback'});
     }
@@ -150,6 +154,8 @@ var IdeActions =
     }
 
     function addMatchesToParams(runData, params) {
+        if (!!params.matches && params.matches.length > 0) return params;
+
         let matches = [];
 
         for (let i = 0; i < params.iterations; i++)
@@ -240,6 +246,7 @@ var IdeActions =
         actions.stopBatch = stopBatch;
         actions.setGameOptionsToManual = setGameOptionsToManual;
         actions.setGameOptionsToAuto = setGameOptionsToAuto;
+        actions.setGameOptionsText = setGameOptionsText;
         actions.stopPlayback = stopPlayback;
         actions.playMatch = playMatch;
         actions.getAgentsData = getAgentsData;

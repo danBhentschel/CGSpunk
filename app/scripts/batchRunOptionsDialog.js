@@ -19,9 +19,14 @@
     });
 
     function onStartRunButtonClicked() {
-        let options = readOptionsFromForm();
+        let options;
 
-        chrome.storage.sync.set(options);
+        if ($('#advancedTabs > li.active > a').is('#formTab')) {
+            options = readOptionsFromForm();
+            chrome.storage.sync.set(options);
+        } else {
+            options = JSON.parse($('#json').val());
+        }
 
         if (!inArena) options.arenaCodeEnabled = false;
 
