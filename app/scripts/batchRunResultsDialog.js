@@ -50,6 +50,11 @@ function showSummary(results) {
         }
     }
 
+    if (results.numOpponents > 1) {
+        $('#ideAveragePosition').show();
+        if (results.arenaCodeEnabled) $('#arenaAveragePosition').show();
+    }
+
     if (results.arenaCodeEnabled) {
         $('#hdrIdeCode').show();
         $('#arenaRow').show();
@@ -205,6 +210,7 @@ function updateSummary(results) {
     let winsId = '#wins' + fieldId;
     let lossesId = '#losses' + fieldId;
     let tiesId = '#ties' + fieldId;
+    let avgId = '#average' + typeId + 'Position';
 
     let wins = findMatchesOfStatus(matches, swapNum, type, 'w').length;
     let losses = findMatchesOfStatus(matches, swapNum, type, 'l').length;
@@ -216,6 +222,10 @@ function updateSummary(results) {
 
     addSwapSignificantRuns(results, matches);
     addCodeSignificantRuns(results, matches);
+
+    let avgElement = $(avgId);
+    if (avgElement.is(':visible'))
+        avgElement.text(calcAveragePositionInfo(results.matches, userName, type));
 }
 
 function calcMatchInfo(match, userName) {
@@ -233,6 +243,13 @@ function calcMatchStatus(match, userName) {
 
     if (winners.length === 1) return winners[0].name === userName ? 'w' : 'l';
     return winners.filter(_ => _.name === userName).length ? 't' : 'l';
+}
+
+function calcAveragePositionInfo(matches, userName, type) {
+    var positions = matches.filter(_ => _.data.type === type)
+        .map(match => match.results.rankings.find(_ => _.name === userName).rank);
+    var sum = positions.reduce((a, b) => a + b);
+    return (sum / positions.length).toFixed(2);
 }
 
 function findMatchesOfStatus(matches, swapNum, type, status) {
