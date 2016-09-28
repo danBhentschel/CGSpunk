@@ -19,9 +19,10 @@ function addMatch(results, tabId) {
 
     let match = results.matches[g_matchNum-1]; 
     let iteration = match.iteration;
-    let totalMatches = results.totalMatches
+    let totalMatches = results.totalMatches;
+    let hasScores = !!match.scores;
 
-    if (g_matchNum === 1) showSummary(results);
+    if (g_matchNum === 1) showSummary(results, hasScores);
     $('#numMatches').text(g_matchNum + ' / ' + totalMatches);
 
     addRowToTable(match, results, tabId);
@@ -30,7 +31,7 @@ function addMatch(results, tabId) {
     if (g_matchNum === totalMatches) showBatchButton(results);
 }
 
-function showSummary(results) {
+function showSummary(results, hasScores) {
     if (results.swapEnabled) {
         $('#hdrIdePosition1').show();
         if (results.arenaCodeEnabled) $('#hdrArenaPosition1').show();
@@ -48,6 +49,12 @@ function showSummary(results) {
             $('#divIdePosition4').show();
             if (results.arenaCodeEnabled) $('#divArenaPosition4').show();
         }
+    }
+
+    if (hasScores) {
+        $('#ideAverageScore').show();
+        $('#scoresColumn').show();
+        if (results.arenaCodeEnabled) $('#arenaAverageScore').show();
     }
 
     if (results.numOpponents > 1) {
@@ -69,6 +76,7 @@ function addRowToTable(match, results, tabId) {
     row += sendToIdeButtonCell();
     row += runLabelCell(match, results);
     row += playersLabelCell(match);
+    row += scoresCell(match);
     row += winnerLabelCell(match.results.rankings);
     row += stderrLinkCell();
     row += '</tr>';
@@ -126,6 +134,16 @@ function runLabelCell(match, results) {
 function playersLabelCell(match) {
     let players = match.results.rankings.map(_ => playerLabel(_, match));
     return '<td>' + players.join('<br />') + '</td>';
+}
+
+function scoresCell(match) {
+    if (!match.scores) return '<td style="display:none;"></td>';
+    let playerNameOrder = match.results.rankings.map(_ => _.name);
+    let scores = playerNameOrder.map(name => {
+        let entry = match.scores.find(_ => _.name === name);
+        return !entry ? '???' : entry.score;
+    });
+    return '<td>' + scores.join('<br />') + '</td>';
 }
 
 function playerLabel(player, match) {
@@ -210,7 +228,8 @@ function updateSummary(results) {
     let winsId = '#wins' + fieldId;
     let lossesId = '#losses' + fieldId;
     let tiesId = '#ties' + fieldId;
-    let avgId = '#average' + typeId + 'Position';
+    let avgPosId = '#average' + typeId + 'Position';
+    let avgScoreId = '#average' + typeId + 'Score';
 
     let wins = findMatchesOfStatus(matches, swapNum, type, 'w').length;
     let losses = findMatchesOfStatus(matches, swapNum, type, 'l').length;
@@ -223,9 +242,13 @@ function updateSummary(results) {
     addSwapSignificantRuns(results, matches);
     addCodeSignificantRuns(results, matches);
 
-    let avgElement = $(avgId);
-    if (avgElement.is(':visible'))
-        avgElement.text(calcAveragePositionInfo(results.matches, userName, type));
+    let avgPosElement = $(avgPosId);
+    if (avgPosElement.is(':visible'))
+        avgPosElement.text(calcAveragePositionInfo(results.matches, userName, type));
+
+    let avgScoreElement = $(avgScoreId);
+    if (avgScoreElement.is(':visible'))
+        avgScoreElement.text(calcAverageScoreInfo(results.matches, userName, type));
 }
 
 function calcMatchInfo(match, userName) {
@@ -250,6 +273,13 @@ function calcAveragePositionInfo(matches, userName, type) {
         .map(match => match.results.rankings.find(_ => _.name === userName).rank);
     var sum = positions.reduce((a, b) => a + b);
     return (sum / positions.length).toFixed(2);
+}
+
+function calcAverageScoreInfo(matches, userName, type) {
+    var scores = matches.filter(_ => _.data.type === type)
+        .map(match => match.scores.find(_ => _.name === userName).score);
+    var sum = scores.reduce((a, b) => a + b);
+    return (sum / scores.length).toFixed(2);
 }
 
 function findMatchesOfStatus(matches, swapNum, type, status) {

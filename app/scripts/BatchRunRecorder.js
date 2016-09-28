@@ -20,8 +20,8 @@ var BatchRunRecorder =
         return agent.codingamer.pseudo;
     }
 
-    function recordMatch(results, match, matchResults) {
-        results.matches.push({ data: match, results: matchResults });
+    function recordMatch(results, match, scores, matchResults) {
+        results.matches.push({ data: match, results: matchResults, scores: scores });
 
         return results;
     }

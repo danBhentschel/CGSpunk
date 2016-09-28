@@ -84,6 +84,10 @@ var IdeActions =
         return sendMessageToInjectedScript({action:'addAgents', data: {agents: agents}});
     }
 
+    function getGameScores() {
+        return sendMessageToInjectedScript({action:'getGameScores'});
+    }
+
     function batchRun() {
         getCurrentUserArenaAgent()
             .then(agent => options.getRunParameters(!!agent))
@@ -254,5 +258,6 @@ var IdeActions =
         actions.getCurrentUser = getCurrentUser;
         actions.addAgent = addAgent;
         actions.addAgents = addAgents;
+        actions.getGameScores = getGameScores;
     };
 })(BatchRunOptions, BatchRunner);

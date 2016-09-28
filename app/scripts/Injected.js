@@ -62,6 +62,7 @@
         if (data.action === 'addAgent') addAgent(data.data);
         if (data.action === 'addAgents') addAgents(data.data);
         if (data.action === 'setPlaybackFrame') setPlaybackFrame(data.data);
+        if (data.action === 'getGameScores') getGameScores();
     }, false);
 
     function rotateAgents() {
@@ -159,6 +160,27 @@
         }
     }
 
+    function getGameScores() {
+        waitForGameManager()
+            .then(gameManager => {
+                var gameName = gameManager.drawer.drawer.question;
+                var scores = null;
+                if (gameName === 'Hypersonic') scores = getGameScoresForHypersonic(gameManager);
+                return scores;
+            })
+            .then(scores => window.postMessage({action:'getGameScoresComplete', result: scores}, '*'));
+    }
+
+    function getGameScoresForHypersonic(gameManager) {
+        var agentNames = gameManager.agents.map(_ => _.name);
+        var lastFrameData = gameManager.views[gameManager.views.length-1];
+        var playerData = lastFrameData.split('\n').slice(2, 2 + agentNames.length);
+        return agentNames.map((_, i) => { return {
+            name: _,
+            score: parseInt(playerData[i].split(' ')[3], 10)
+        }; });
+    }
+
     function stopPlayback() {
         waitForGameManager()
             .then(gameManager => { gameManager.pause(); return gameManager; })
@@ -171,13 +193,13 @@
     }
 
     function doWaitForGameManager(resolve) {
-        if (!(angular.element('.play-pause-button')) ||
-            !(angular.element('.play-pause-button').scope()) ||
-            !(angular.element('.play-pause-button').scope().gameManager)) {
+        if (!(angular.element('.player')) ||
+            !(angular.element('.player').scope()) ||
+            !(angular.element('.player').scope().gameManager)) {
 
             setTimeout(() => doWaitForGameManager(resolve), 100);
         } else {
-            resolve(angular.element('.play-pause-button').scope().gameManager);
+            resolve(angular.element('.player').scope().gameManager);
         }
     }
 

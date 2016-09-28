@@ -38,12 +38,15 @@ var BatchRunner =
             .then(context.ideActions.stopPlayback)
             .then(dom.getResultsOfMatch)
             .then(results => {
-                let match = context.matches[context.matchNum];
-                match.gameOptions = results.options;
-                context.results = recorder.recordMatch(context.results, match, results);
-                reporter.reportMatch(context.results);
-                context.matchNum++;
-                doMatch(context);
+                context.ideActions.getGameScores()
+                    .then(scores => {
+                        let match = context.matches[context.matchNum];
+                        match.gameOptions = results.options;
+                        context.results = recorder.recordMatch(context.results, match, scores, results);
+                        reporter.reportMatch(context.results);
+                        context.matchNum++;
+                        doMatch(context);
+                    });
             });
     }
 
