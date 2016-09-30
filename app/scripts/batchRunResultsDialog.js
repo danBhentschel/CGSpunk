@@ -58,8 +58,8 @@ function showSummary(results, hasScores) {
     }
 
     if (results.numOpponents > 1) {
-        $('#ideAveragePosition').show();
-        if (results.arenaCodeEnabled) $('#arenaAveragePosition').show();
+        $('#ideAveragePlacement').show();
+        if (results.arenaCodeEnabled) $('#arenaAveragePlacement').show();
     }
 
     if (results.arenaCodeEnabled) {
@@ -228,7 +228,7 @@ function updateSummary(results) {
     let winsId = '#wins' + fieldId;
     let lossesId = '#losses' + fieldId;
     let tiesId = '#ties' + fieldId;
-    let avgPosId = '#average' + typeId + 'Position';
+    let avgPosId = '#average' + typeId + 'Placement';
     let avgScoreId = '#average' + typeId + 'Score';
 
     let wins = findMatchesOfStatus(matches, swapNum, type, 'w').length;
@@ -244,7 +244,7 @@ function updateSummary(results) {
 
     let avgPosElement = $(avgPosId);
     if (avgPosElement.is(':visible'))
-        avgPosElement.text(calcAveragePositionInfo(results.matches, userName, type));
+        avgPosElement.text(calcAveragePlacementInfo(results.matches, userName, type));
 
     let avgScoreElement = $(avgScoreId);
     if (avgScoreElement.is(':visible'))
@@ -268,17 +268,22 @@ function calcMatchStatus(match, userName) {
     return winners.filter(_ => _.name === userName).length ? 't' : 'l';
 }
 
-function calcAveragePositionInfo(matches, userName, type) {
-    var positions = matches.filter(_ => _.data.type === type)
-        .map(match => match.results.rankings.find(_ => _.name === userName).rank);
-    var sum = positions.reduce((a, b) => a + b);
-    return (sum / positions.length).toFixed(2);
+function calcAveragePlacementInfo(matches, userName, type) {
+    let placements = matches.filter(_ => _.data.type === type)
+        .map(match => {
+            let value = match.results.rankings.find(_ => _.name === userName).rank;
+            let count = match.results.rankings.filter(_ => _.rank == value).length;
+            for (let i = 1; i < count; i++) value += value + i;
+            return value / count;
+        });
+    let sum = placements.reduce((a, b) => a + b);
+    return (sum / placements.length).toFixed(2);
 }
 
 function calcAverageScoreInfo(matches, userName, type) {
-    var scores = matches.filter(_ => _.data.type === type)
+    let scores = matches.filter(_ => _.data.type === type)
         .map(match => match.scores.find(_ => _.name === userName).score);
-    var sum = scores.reduce((a, b) => a + b);
+    let sum = scores.reduce((a, b) => a + b);
     return (sum / scores.length).toFixed(2);
 }
 
