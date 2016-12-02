@@ -4,10 +4,11 @@
     $(document).ready(() => {
         angular.element('body').scope().$on('$routeChangeSuccess', (event, route) => {
             let url = route['$$route']['templateUrl'];
+            console.log(`routeChangeSuccess: ${url}`);
             if (!url) return;
-            if (url.startsWith('modules/ide')) {
+            if (url.includes('modules/ide/')) {
                 sendMultiplayerMessageWhenLoaded();
-            } else if (url.startsWith('modules/replay')) {
+            } else if (url.includes('modules/replay/')) {
                 sendReplayMessageWhenLoaded();
             }
         });
