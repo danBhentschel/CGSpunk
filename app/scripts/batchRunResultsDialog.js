@@ -394,18 +394,16 @@ function prepareBatchAgent(agent) {
 }
 
 function prepareBatchBoss(agent) {
-    return agent;
-    /*return {
+    return {
         agentId: agent.agentId,
-        arenaBoss: {
+        arenaboss: {
             arenabossId: agent.arenaboss.arenabossId,
             nickname: agent.arenaboss.nickname,
-	    league: {
-                divisionCount: agent.arenaboss.league.divisionCount,
+	        league: {
                 divisionIndex: agent.arenaboss.league.divisionIndex,
-                openingLeaguesCount: agent.arenaboss.league.openingLeaguesCount
+                divisionCount: agent.arenaboss.league.divisionCount
             }
         },
         codingamer: null
-    };*/
+    };
 }
