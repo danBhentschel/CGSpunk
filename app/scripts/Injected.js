@@ -317,9 +317,9 @@
 
                 let agents = [];
                 for (let i = low; i <= high; i++) {
-                    let thisAgent = allAgents[i];
-                    if (thisAgent.pseudo === myAgent.pseudo) continue;
-                    agents.push(allAgents[i]);
+                    if (i == myAgent.rank) continue;
+                    let thisAgent = allAgents.find(_ => _.rank == i);
+                    if (!!thisAgent) agents.push(thisAgent);
                 }
 
                 return agents;
