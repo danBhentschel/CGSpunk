@@ -220,14 +220,19 @@ var IdeActions =
 
     function getRandomOpponents(runData, num) {
         let opponents = [];
-        for (let i = 0; i < num; i++)
-            opponents.push(getRandomOpponent(runData.candidateAgents));
+        let candidates = runData.candidateAgents.slice(0);
+        for (let i = 0; i < num; i++) {
+            if (candidates.length === 0) break;
+            var opponentNum = getRandomOpponentNum(candidates);
+            opponents.push(candidates[opponentNum]);
+            candidates.splice(opponentNum, 1);
+        }
 
         return opponents;
     }
 
-    function getRandomOpponent(candidates) {
-        return candidates[Math.floor(Math.random() * candidates.length)]
+    function getRandomOpponentNum(candidates) {
+        return Math.floor(Math.random() * candidates.length);
     }
 
     function newMatch(players, autoGameOptions, type, swapNum, iteration) {
