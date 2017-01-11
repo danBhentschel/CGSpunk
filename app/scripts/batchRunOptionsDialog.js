@@ -14,8 +14,12 @@
 
         $('#startRunButton').click(onStartRunButtonClicked);
 
+        $('#opponentCurrent').on('shown.bs.tab', () => $('#opponentNumberOptions').collapse('hide'));
+        $('#opponentCurrent').on('hidden.bs.tab', () => $('#opponentNumberOptions').collapse('show'));
         $('#opponentRange').on('shown.bs.tab', () => $('#opponentSelectOptions').collapse('show'));
         $('#opponentRange').on('hidden.bs.tab', () => $('#opponentSelectOptions').collapse('hide'));
+        $('#opponentCustomRange').on('shown.bs.tab', () => $('#opponentCustomRangeOptions').collapse('show'));
+        $('#opponentCustomRange').on('hidden.bs.tab', () => $('#opponentCustomRangeOptions').collapse('hide'));
     });
 
     function onStartRunButtonClicked() {
@@ -45,13 +49,16 @@
             arenaCodeEnabled: $('#enableArenaCode').prop('checked'),
             opponentSelectionType: readOpponentSelectionTypeFromForm(),
             opponentSelectionRange: $('#selectRange').val(),
+            opponentRangeFrom: $('#rangeFrom').val(),
+            opponentRangeTo: $('#rangeTo').val(),
             numOpponents: readNumOpponentsFromForm()
         };
     }
 
     function readOpponentSelectionTypeFromForm() {
-        return $('#opponentSelectionType > li.active > a').is('#opponentCurrent')
-            ? 'current' : 'range';
+        if ($('#opponentSelectionType > li.active > a').is('#opponentCurrent')) return 'current';
+        if ($('#opponentSelectionType > li.active > a').is('#opponentRange')) return 'range';
+        return 'custom';
     }
 
     function readNumOpponentsFromForm() {
@@ -68,6 +75,8 @@
         arenaCodeEnabled: false,
         opponentSelectionType: 'current',
         opponentSelectionRange: 10,
+        opponentRangeFrom: 1,
+        opponentRangeTo: 10,
         numOpponents: 1
     };
 
@@ -80,9 +89,12 @@
         $('#enableSwap').prop('checked', items.swapEnabled);
         $('#enableArenaCode').prop('checked', items.arenaCodeEnabled);
         $('#selectRange').val(items.opponentSelectionRange);
+        $('#rangeFrom').val(items.opponentRangeFrom);
+        $('#rangeTo').val(items.opponentRangeTo);
 
         if (items.opponentSelectionType === 'current') $('#opponentCurrent').tab('show');
-        else $('#opponentRange').tab('show');
+        else if (items.opponentSelectionType === 'range') $('#opponentRange').tab('show');
+        else $('#opponentCustomRange').tab('show');
 
         restoreSavedNumOpponentsValue(items.numOpponents);
     }

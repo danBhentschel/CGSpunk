@@ -13,7 +13,7 @@
 <body>
 
 <!-- Haven't implemented translation -->
-<div class="container">
+<div class="container" style="padding-bottom:12px">
 
     <h1>Run a set of matches</h1>
 
@@ -48,10 +48,11 @@
                     <ul class="nav nav-pills nav-stacked" id="opponentSelectionType">
                         <li class="active"><a href="" data-toggle="pill" id="opponentCurrent">Use the current opponent(s) in the IDE</a></li>
                         <li><a href="" data-toggle="pill" id="opponentRange">Select from a range of opponents ranked above and below me</a></li>
+                        <li><a href="" data-toggle="pill" id="opponentCustomRange">Specify a custom range of opponents to select from</a></li>
                     </ul>
                 </div>
 
-                <div id="opponentSelectOptions" class="collapse form-group">
+                <div id="opponentNumberOptions" class="collapse form-group">
                     <div class="form-group" id="numOpponentsSection">
                         <label for="numOpponents">Number of opponent players:</label>
                         <div class="form-group">
@@ -62,7 +63,9 @@
                             </ul>
                         </div>
                     </div>
+                </div>
         
+                <div id="opponentSelectOptions" class="collapse form-group">
                     <div class="form-group" id="opponentSelectRange">
                         <label for="selectRange">Range size:</label>
                         <select class="form-control" id="selectRange">
@@ -74,6 +77,17 @@
                             <option>50</option>
                             <option>100</option>
                         </select>
+                    </div>
+                </div>
+
+                <div id="opponentCustomRangeOptions" class="collapse form-group">
+                    <div class="form-group">
+                        <label for="rangeFrom">Range from:</label>
+                        <input type="text" class="form-control" id="rangeFrom" />
+                    </div>
+                    <div class="form-group">
+                        <label for="rangeTo">Range to:</label>
+                        <input type="text" class="form-control" id="rangeTo" />
                     </div>
                 </div>
             </fieldset>

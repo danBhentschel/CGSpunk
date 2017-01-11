@@ -72,6 +72,10 @@ var IdeActions =
         return sendMessageToInjectedScript({action:'getAgentsAroundAgent', data: {name: name, range: range}});
     }
 
+    function getAgentsInRange(name, rangeFrom, rangeTo) {
+        return sendMessageToInjectedScript({action:'getAgentsInRange', data: {name: name, rangeFrom: rangeFrom, rangeTo: rangeTo}});
+    }
+
     function getCurrentUserArenaAgent() {
         return sendMessageToInjectedScript({action:'getCurrentUserArenaAgent'});
     }
@@ -101,7 +105,7 @@ var IdeActions =
     function prepareBatchRun(params) {
         if (!params) return;
         return addMyAgentsToRunData({}, params)
-            .then(runData => addAgentsAroundMeToRunData(runData, params))
+            .then(runData => addCandidateAgentsToRunData(runData, params))
             .then(runData => addCurrentPlayersToRunData(runData, params))
             .then(runData => {
                 params.initialAgents = runData.currentPlayers;
@@ -135,12 +139,24 @@ var IdeActions =
         };
     }
 
-    function addAgentsAroundMeToRunData(runData, params) {
+    function addCandidateAgentsToRunData(runData, params) {
+        if (params.opponentSelectionType === 'custom')
+            return addAgentsInCustomRangeToRunData(runData, params);
+
         if (params.opponentSelectionType !== 'range')
             return new Promise(resolve => resolve(runData));
 
         return getCurrentUserName()
             .then(name => getAgentsAroundAgent(name, params.opponentSelectionRange))
+            .then(agents => {
+                runData.candidateAgents = agents;
+                return runData;
+            });
+    }
+
+    function addAgentsInCustomRangeToRunData(runData, params) {
+        return getCurrentUserName()
+            .then(name => getAgentsInRange(name, params.opponentRangeFrom, params.opponentRangeTo))
             .then(agents => {
                 runData.candidateAgents = agents;
                 return runData;

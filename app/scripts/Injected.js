@@ -58,6 +58,7 @@
         if (data.action === 'getAgentsData') getAgentsData();
         if (data.action === 'sendToIde') sendToIde(data.data);
         if (data.action === 'getAgentsAroundAgent') getAgentsAroundAgent(data.data);
+        if (data.action === 'getAgentsInRange') getAgentsInRange(data.data);
         if (data.action === 'getCurrentUser') getCurrentUser();
         if (data.action === 'getCurrentUserArenaAgent') getCurrentUserArenaAgent();
         if (data.action === 'addAgent') addAgent(data.data);
@@ -306,25 +307,46 @@
     function getAgentsAroundAgent(data) {
         waitForLeaderboardToBePopulated(getLeaderboard())
             .then(allAgents => {
+                let myRank = findAgentInList(allAgents, data.name).rank;
                 let range = parseInt(data.range, 10);
-                let myAgent = allAgents.find(_ => _.pseudo === data.name);
-                if (!!myAgent && !!myAgent.league) {
-                    allAgents = allAgents.filter(_ => !!_.league && _.league.divisionIndex === myAgent.league.divisionIndex);
-                }
-                if (!myAgent) myAgent = { rank: allAgents.length - 1 };
-                let low = Math.max(0, myAgent.rank - range);
-                let high = Math.min(allAgents.length - 1, myAgent.rank + range);
+                let low = Math.max(0, myRank - range);
+                let high = Math.min(allAgents.length - 1, myRank + range);
 
-                let agents = [];
-                for (let i = low; i <= high; i++) {
-                    if (i == myAgent.rank) continue;
-                    let thisAgent = allAgents.find(_ => _.rank == i);
-                    if (!!thisAgent) agents.push(thisAgent);
-                }
-
-                return agents;
+                return getAgentsFromTo(allAgents, low, high, myRank);
             })
             .then(agents => window.postMessage({action:'getAgentsAroundAgentComplete', result: agents}, '*'));
+    }
+
+    function findAgentInList(allAgents, name) {
+        let agent = allAgents.find(_ => _.pseudo === name);
+        if (!!agent && !!agent.league) {
+            allAgents = allAgents.filter(_ => !!_.league && _.league.divisionIndex === agent.league.divisionIndex);
+        }
+        if (!agent) agent = { rank: allAgents.length - 1 };
+        return agent;
+    }
+
+    function getAgentsFromTo(allAgents, low, high, myRank) {
+        let agents = [];
+        for (let i = low; i <= high; i++) {
+            if (i == myRank) continue;
+            let thisAgent = allAgents.find(_ => _.rank == i);
+            if (!!thisAgent) agents.push(thisAgent);
+        }
+        return agents;
+    }
+
+    function getAgentsInRange(data) {
+        waitForLeaderboardToBePopulated(getLeaderboard())
+            .then(allAgents => {
+                let myRank = findAgentInList(allAgents, data.name).rank;
+                let low = parseInt(data.rangeFrom, 10);
+                let high = parseInt(data.rangeTo, 10);
+                if (low > high) { let tmp = low; low = high; high = tmp; }
+
+                return getAgentsFromTo(allAgents, low, high, myRank);
+            })
+            .then(agents => window.postMessage({action:'getAgentsInRangeComplete', result: agents}, '*'));
     }
 
     function getLeaderboard() {
