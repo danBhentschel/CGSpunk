@@ -93,11 +93,13 @@ var IdeActions =
             .then(agent => options.getRunParameters(!!agent))
             .then(prepareBatchRun)
             .then(params => {
+                if (!params) return;
                 g_runContext = runner.runBatch(params, IdeActions);
             });
     }
 
     function prepareBatchRun(params) {
+        if (!params) return;
         return addMyAgentsToRunData({}, params)
             .then(runData => addAgentsAroundMeToRunData(runData, params))
             .then(runData => addCurrentPlayersToRunData(runData, params))
