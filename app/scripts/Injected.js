@@ -169,18 +169,19 @@
                 var scores = null;
                 if (gameName === 'Hypersonic') scores = getGameScoresForHypersonic(gameManager);
                 else if (gameName === 'Fantastic Bits') scores = getGameScoresForFantasticBits(gameManager);
+                else if (gameName === 'CodeBusters') scores = getGameScoresForCodeBusters(gameManager);
                 return scores;
             })
             .then(scores => window.postMessage({action:'getGameScoresComplete', result: scores}, '*'));
     }
 
     function getGameScoresForHypersonic(gameManager) {
-        var agentNames = gameManager.agents.map(_ => _.name);
-        var lastFrameData = gameManager.views[gameManager.views.length-1];
-        var playerData = lastFrameData.split('\n').slice(2, 2 + agentNames.length);
-        return agentNames.map((_, i) => { return {
-            name: _,
-            score: parseInt(playerData[i].split(' ')[3], 10)
+        let drawer = gameManager.drawer.drawer;
+        let numBoxes = drawer.initData.boxes.length;
+        return drawer.scope.playerInfo.map(_ => { return {
+            name: _.name,
+            score: _.score % 100,
+            max: numBoxes
         }; });
     }
 
@@ -197,6 +198,16 @@
             name: _,
             score: parseInt(scores[i], 10),
             max: numSnaffles
+        }; });
+    }
+
+    function getGameScoresForCodeBusters(gameManager) {
+        let drawer = gameManager.drawer.drawer;
+        let numGhosts = parseInt(drawer.initData.ghostCount, 10);
+        return drawer.scope.playerInfo.map(_ => { return {
+            name: _.name,
+            score: _.score,
+            max: numGhosts
         }; });
     }
 
