@@ -38,6 +38,14 @@ var BatchRunner =
             .then(context.ideActions.stopPlayback)
             .then(dom.getResultsOfMatch)
             .then(results => {
+                if (!!results.crash) return results;
+                return context.ideActions.getGameEndState()
+                    .then(endState => {
+                        results.endState = endState;
+                        return results;
+                    });
+            })
+            .then(results => {
                 context.ideActions.getGameScores()
                     .then(scores => {
                         let match = context.matches[context.matchNum];

@@ -92,6 +92,10 @@ var IdeActions =
         return sendMessageToInjectedScript({action:'getGameScores'});
     }
 
+    function getGameEndState() {
+        return sendMessageToInjectedScript({action:'getGameEndState'});
+    }
+
     function batchRun() {
         getCurrentUserArenaAgent()
             .then(agent => options.getRunParameters(!!agent))
@@ -282,5 +286,6 @@ var IdeActions =
         actions.addAgent = addAgent;
         actions.addAgents = addAgents;
         actions.getGameScores = getGameScores;
+        actions.getGameEndState = getGameEndState;
     };
 })(BatchRunOptions, BatchRunner);

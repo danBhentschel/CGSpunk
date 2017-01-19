@@ -88,11 +88,25 @@ function addRowToTable(match, results, tabId) {
 }
 
 function crashButtonCell(matchResults) {
-    return '<td>' + (!!matchResults.crash
-               ? '<button type="button" class="btn btn-danger" id="crashBtn' + g_matchNum + 
-                 '" data-toggle="tooltip" title="' + matchResults.crash +
-                 '"><span class="glyphicon glyphicon-exclamation-sign" /></button>'
-               : '') + '</td>';
+    if (!!matchResults.crash) {
+        return '<td><button type="button" class="btn btn-danger" id="crashBtn' + g_matchNum + 
+            '" data-toggle="tooltip" title="' + matchResults.crash +
+            '"><span class="glyphicon glyphicon-exclamation-sign" /></button></td>';
+    }
+
+    if (matchResults.endState == 'invalid') {
+        return '<td><button type="button" class="btn btn-danger" id="invalidBtn' + g_matchNum + 
+            '" data-toggle="tooltip" title="' + chrome.i18n.getMessage('invalidToolTip') +
+            '"><span class="glyphicon glyphicon-question-sign" /></button></td>';
+    }
+
+    if (matchResults.endState == 'timeout') {
+        return '<td><button type="button" class="btn btn-danger" id="timeoutBtn' + g_matchNum + 
+            '" data-toggle="tooltip" title="' + chrome.i18n.getMessage('timeoutToolTip') +
+            '"><span class="glyphicon glyphicon-time" /></button></td>';
+    }
+
+    return '<td></td>';
 }
 
 function replayButtonCell() {
@@ -209,6 +223,8 @@ function addButtonEventHandlers(tbody, match, tabId) {
 function enableButtonTooltips() {
     $('#replayBtn' + g_matchNum).tooltip({ trigger: 'hover' });
     $('#crashBtn' + g_matchNum).tooltip({ trigger: 'hover' });
+    $('#invalidBtn' + g_matchNum).tooltip({ trigger: 'hover' });
+    $('#timeoutBtn' + g_matchNum).tooltip({ trigger: 'hover' });
     $('#sendToIdeBtn' + g_matchNum).tooltip({ trigger: 'hover' });
 }
 

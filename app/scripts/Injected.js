@@ -65,6 +65,7 @@
         if (data.action === 'addAgents') addAgents(data.data);
         if (data.action === 'setPlaybackFrame') setPlaybackFrame(data.data);
         if (data.action === 'getGameScores') getGameScores();
+        if (data.action === 'getGameEndState') getGameEndState();
     }, false);
 
     function rotateAgents() {
@@ -194,11 +195,14 @@
         index += 1 + numSnaffles;
         index += 1 + parseInt(lastFrameData[index], 10);
         let scores = lastFrameData[index].split(' ');
-        return agentNames.map((_, i) => { return {
-            name: _,
-            score: parseInt(scores[i], 10),
-            max: numSnaffles
-        }; });
+        return agentNames.map((_, i) => { 
+            var score = parseInt(scores[i], 10);
+            return {
+                name: _,
+                score: score >= 0 ? score : 0,
+                max: numSnaffles
+            };
+        });
     }
 
     function getGameScoresForCodeBusters(gameManager) {
@@ -206,9 +210,23 @@
         let numGhosts = parseInt(drawer.initData.ghostCount, 10);
         return drawer.scope.playerInfo.map(_ => { return {
             name: _.name,
-            score: _.score,
+            score: _.score >= 0 ? _.score : 0,
             max: numGhosts
         }; });
+    }
+
+    function getGameEndState() {
+        waitForGameManager()
+            .then(gameManager => {
+                let me = getUserFromService().pseudo;
+                let agentId = gameManager.agents.map(_ => _.name).indexOf(me);
+                let myFrames = gameManager.frames.filter(_ => _.agentId == agentId);
+                let info = myFrames[myFrames.length-1].gameInformation;
+                if (info.includes('nvalid input')) return 'invalid';
+                if (info.includes('Timeout:')) return 'timeout';
+                return 'normal';
+            })
+            .then(state => window.postMessage({action:'getGameEndStateComplete', result: state}, '*'));
     }
 
     function stopPlayback() {

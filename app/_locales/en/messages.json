@@ -105,6 +105,14 @@
     "message": "Swapped order",
     "description": "Heading for a section in the batch run summary"
   },
+  "invalidToolTip": {
+    "message": "Output was invalid",
+    "description": "Occurs when the bot provides an invalid instruction"
+  },
+  "timeoutToolTip": {
+    "message": "Bot timed out",
+    "description": "Occurs when the bot times out"
+  },
   "significantRunsLabel": {
     "message": "Runs where order matters",
     "description": "Heading for a section in the batch run summary"
