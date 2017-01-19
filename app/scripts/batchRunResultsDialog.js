@@ -300,15 +300,15 @@ function calcAveragePlacementInfo(matches, userName, type) {
 
 function calcAverageScoreInfo(matches, userName, type) {
     let isPercent = false;
-    let scores = matches.filter(_ => _.data.type === type)
-        .map(match => {
-            let entry = match.scores.find(_ => _.name === userName);
-            if (!entry.max) return entry.score;
-            isPercent = true;
-            return entry.score * 100 / entry.max;
-        });
+    let filteredMatches = matches.filter(_ => _.data.type === type);
+    let scores = filteredMatches.map(match => 
+            match.scores.find(_ => _.name === userName).score);
+    let pool = filteredMatches.map(match => 
+            match.scores.find(_ => _.name === userName).max);
     let sum = scores.reduce((a, b) => a + b);
-    return (sum / scores.length).toFixed(2) + (isPercent ? '%' : '');
+    let total = pool.reduce((a, b) => a + b);
+    if (total > 0) return Math.round(sum * 100 / total) + '%';
+    return (sum / scores.length).toFixed(2);
 }
 
 function findMatchesOfStatus(matches, swapNum, type, status) {
