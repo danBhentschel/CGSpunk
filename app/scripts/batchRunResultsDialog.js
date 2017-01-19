@@ -141,7 +141,9 @@ function scoresCell(match) {
     let playerNameOrder = match.results.rankings.map(_ => _.name);
     let scores = playerNameOrder.map(name => {
         let entry = match.scores.find(_ => _.name === name);
-        return !entry ? '???' : entry.score;
+        if (!entry) return '???';
+        if (!entry.max) return entry.score;
+        return entry.score + '&nbsp;/&nbsp;' + entry.max;
     });
     return '<td>' + scores.join('<br />') + '</td>';
 }
@@ -281,10 +283,16 @@ function calcAveragePlacementInfo(matches, userName, type) {
 }
 
 function calcAverageScoreInfo(matches, userName, type) {
+    let isPercent = false;
     let scores = matches.filter(_ => _.data.type === type)
-        .map(match => match.scores.find(_ => _.name === userName).score);
+        .map(match => {
+            let entry = match.scores.find(_ => _.name === userName);
+            if (!entry.max) return entry.score;
+            isPercent = true;
+            return entry.score * 100 / entry.max;
+        });
     let sum = scores.reduce((a, b) => a + b);
-    return (sum / scores.length).toFixed(2);
+    return (sum / scores.length).toFixed(2) + (isPercent ? '%' : '');
 }
 
 function findMatchesOfStatus(matches, swapNum, type, status) {

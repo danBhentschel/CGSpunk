@@ -4,7 +4,7 @@
     $(document).ready(() => {
         angular.element('body').scope().$on('$routeChangeSuccess', (event, route) => {
             let url = route['$$route']['templateUrl'];
-            console.log(`routeChangeSuccess: ${url}`);
+            //console.log(`routeChangeSuccess: ${url}`);
             if (!url) return;
             if (url.includes('modules/ide/')) {
                 sendMultiplayerMessageWhenLoaded();
@@ -168,6 +168,7 @@
                 var gameName = gameManager.drawer.drawer.question;
                 var scores = null;
                 if (gameName === 'Hypersonic') scores = getGameScoresForHypersonic(gameManager);
+                else if (gameName === 'Fantastic Bits') scores = getGameScoresForFantasticBits(gameManager);
                 return scores;
             })
             .then(scores => window.postMessage({action:'getGameScoresComplete', result: scores}, '*'));
@@ -180,6 +181,22 @@
         return agentNames.map((_, i) => { return {
             name: _,
             score: parseInt(playerData[i].split(' ')[3], 10)
+        }; });
+    }
+
+    function getGameScoresForFantasticBits(gameManager) {
+        let index = 5;
+        let agentNames = gameManager.agents.map(_ => _.name);
+        let lastFrameData = gameManager.views[gameManager.views.length-1].split('\n');
+        index += 1 + parseInt(lastFrameData[index], 10);
+        let numSnaffles = parseInt(lastFrameData[index], 10);
+        index += 1 + numSnaffles;
+        index += 1 + parseInt(lastFrameData[index], 10);
+        let scores = lastFrameData[index].split(' ');
+        return agentNames.map((_, i) => { return {
+            name: _,
+            score: parseInt(scores[i], 10),
+            max: numSnaffles
         }; });
     }
 
