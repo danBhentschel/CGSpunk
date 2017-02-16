@@ -1,5 +1,5 @@
 var IdeDomManipulator =
-(function(utils) {
+(function() {
     'use strict';
 
     // NOTE: EVERY public function in this object returns a Promise.
@@ -74,80 +74,12 @@ var IdeDomManipulator =
     }
 
     // public
-    function getResultsOfMatch() {
-        return new Promise(resolve => {
-            waitForResults(resolve);
-        });
-    }
-
-    // public
     function getNumPlayerSlots() {
         return new Promise(resolve => resolve($('.agent').length));
     }
     
 
     // ***************** All private after here ****************
-
-    function waitForResults(resolve) {
-        let rankedNames = $('.cg-ide-mini-leaderboard').find('.nickname');
-        if ($('.play').is(':disabled') || rankedNames.length == 0) {
-            setTimeout(() => waitForResults(resolve), 200);
-        } else {
-            resolve(getResults(rankedNames));
-        }
-    }
-
-    function getResults(rankedNames) {
-        let results = {
-            rankings: [],
-            options: getMatchOptions(),
-            stderr: getMatchStderr(),
-            crash: getCrashInfo(),
-            replay: getReplayUrl()
-        };
-
-        rankedNames.each(function() {
-            let nameObj = $(this);
-            results.rankings.push({
-                name: nameObj.text(),
-                rank: getRank(nameObj)
-            });
-        });
-
-        return results;
-    }
-
-    function getMatchOptions() {
-        return $('.options-text').val();
-    }
-
-    function getMatchStderr() {
-        let stderr = [];
-
-        $('.stderr > .outputLine').each(function() {
-            stderr.push($(this).text());
-        });
-
-        return stderr;
-    }
-
-    function getRank(nameObj) {
-        return parseInt(nameObj.closest('.leaderboard-item').find('.rank-value').eq(0).text(), 10);
-    }
-
-    function getCrashInfo() {
-        let info = $('.error > .consoleError').text();
-        if (!info) return '';
-        let next = $('.errorLink.in-answer').text().trim();
-        if (next) info += '\n' + next;
-        return info;
-    }
-
-    function getReplayUrl() {
-        let href = $('.replay-button').attr('href');
-	    if (href.startsWith('/replay')) href = 'http://www.codingame.com' + href;
-	    return href;
-    }
 
     function getAgentsScrollPanel() {
         return new Promise(resolve => doGetAgentsScrollPanel(resolve));
@@ -170,7 +102,6 @@ var IdeDomManipulator =
 
         // Batch methods
         manipulator.clickPlayButton = clickPlayButton;
-        manipulator.getResultsOfMatch = getResultsOfMatch;
         manipulator.getNumPlayerSlots = getNumPlayerSlots;
     };
-})(DomUtils);
+})();
