@@ -15,7 +15,8 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
-      'test/mock/chromeRuntime.js',
+      'test/data/*.js',
+      'test/mock/*.js',
       'app/bower_components/jquery/dist/jquery.min.js',
       'app/scripts/QueryStringHelper.js',
       'app/scripts/DomUtils.js',
@@ -26,6 +27,7 @@ module.exports = function(config) {
       'app/scripts/BatchRunner.js',
       'app/scripts/MatchGenerator.js',
       'app/scripts/IdeActions.js',
+      'app/scripts/Injected.js',
       'test/**/*Spec.js'
     ],
 

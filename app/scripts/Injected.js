@@ -1,3 +1,4 @@
+var __CGSpunk_Injected = 
 (function() {
     'use strict';
 
@@ -66,6 +67,7 @@
         if (data.action === 'setPlaybackFrame') setPlaybackFrame(data.data);
         if (data.action === 'getGameScores') getGameScores();
         if (data.action === 'getGameEndState') getGameEndState();
+        if (data.action === 'getResultsOfMatch') getResultsOfMatch();
     }, false);
 
     function rotateAgents() {
@@ -217,16 +219,27 @@
 
     function getGameEndState() {
         waitForGameManager()
-            .then(gameManager => {
-                let me = getUserFromService().pseudo;
-                let agentId = gameManager.agents.map(_ => _.name).indexOf(me);
-                let myFrames = gameManager.frames.filter(_ => _.agentId == agentId);
-                let info = myFrames[myFrames.length-1].gameInformation;
-                if (info.includes('nvalid input')) return 'invalid';
-                if (info.includes('Timeout:')) return 'timeout';
-                return 'normal';
-            })
+            .then(gameManager => getMyStateFromGameManager(gameManager, getUserFromService().pseudo))
             .then(state => window.postMessage({action:'getGameEndStateComplete', result: state}, '*'));
+    }
+
+    function getMyStateFromGameManager(gameManager, me) {
+        let myAgent = getMyAgentFromGameManager(gameManager, me);
+        if (!myAgent) return 'normal';
+        let myFrames = gameManager.frames.filter(_ => _.agentId == myAgent.index);
+        let info = myFrames[myFrames.length-1].gameInformation;
+        if (info.includes('nvalid input')) return 'invalid';
+        if (info.includes('Timeout:')) return 'timeout';
+        return 'normal';
+    }
+
+    function getMyAgentFromGameManager(gameManager, me) {
+        let myAgents = gameManager.agents.filter(_ => _.name === me);
+        if (myAgents.length === 0) return null;
+        if (myAgents.length === 1) return myAgents[0];
+        let ideAgents = myAgents.filter(_ => _.agentId === -1);
+        if (ideAgents.length === 1) return ideAgents[0];
+        return myAgents[0];
     }
 
     function stopPlayback() {
@@ -456,6 +469,66 @@
         window.postMessage({action:'addAgentsComplete'}, '*');
     }
 
+    function getResultsOfMatch() {
+        waitForPlayInProgress(false)
+            .then(waitForGameManager)
+            .then(getResults)
+            .then(results => window.postMessage({action:'getResultsOfMatchComplete', result: results}, '*'));
+    }
+
+    function getResults(gameManager) {
+        return {
+            rankings: rankingsForAgents(gameManager.agents),
+            options: getMatchOptions(),
+            stderr: getMatchStderr(),
+            crash: getCrashInfo(),
+            replay: getReplayUrl()
+        };
+    }
+
+    function rankingsForAgents(agents) {
+        return agents.map(agent => {
+            return {
+                name: agent.name,
+                rank: agent.rank,
+                agentId: agent.agentId
+            };
+        });
+    }
+
+    function getMatchOptions() {
+        return $('.options-text').val();
+    }
+
+    function getMatchStderr() {
+        let stderr = [];
+
+        $('.stderr > .outputLine').each(function() {
+            stderr.push($(this).text());
+        });
+
+        return stderr;
+    }
+
+    function getCrashInfo() {
+        let info = $('.error > .consoleError').text();
+        if (!info) return '';
+        let next = $('.errorLink.in-answer').text().trim();
+        if (next) info += '\n' + next;
+        return info;
+    }
+
+    function getReplayUrl() {
+        let href = $('.replay-button').attr('href');
+	    if (href.startsWith('/replay')) href = 'http://www.codingame.com' + href;
+	    return href;
+    }
+
     if (!angular.isDefined(angular.element('#content').scope()))
         angular.reloadWithDebugInfo();
+
+    return {
+        __FOR_TEST_getMyAgentFromGameManager: getMyAgentFromGameManager,
+        __FOR_TEST_getMyStateFromGameManager: getMyStateFromGameManager
+    };
 })();

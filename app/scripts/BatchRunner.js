@@ -36,7 +36,7 @@ var BatchRunner =
         setupMatch(context)
             .then(context.ideActions.playMatch)
             .then(context.ideActions.stopPlayback)
-            .then(dom.getResultsOfMatch)
+            .then(context.ideActions.getResultsOfMatch)
             .then(results => {
                 if (!!results.crash) return results;
                 return context.ideActions.getGameEndState()

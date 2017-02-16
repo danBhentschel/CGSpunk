@@ -28,7 +28,6 @@
       "js": [
         "bower_components/jquery/dist/jquery.min.js",
         "scripts/QueryStringHelper.js",
-        "scripts/DomUtils.js",
         "scripts/IdeDomManipulator.js",
         "scripts/BatchRunOptions.js",
         "scripts/BatchRunRecorder.js",
