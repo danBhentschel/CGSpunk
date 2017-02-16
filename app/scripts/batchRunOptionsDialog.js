@@ -44,13 +44,13 @@
 
     function readOptionsFromForm() {
         return {
-            iterations:  $('#iterations').val(),
+            iterations:  parseInt($('#iterations').val()),
             swapEnabled: $('#enableSwap').prop('checked'),
             arenaCodeEnabled: $('#enableArenaCode').prop('checked'),
             opponentSelectionType: readOpponentSelectionTypeFromForm(),
-            opponentSelectionRange: $('#selectRange').val(),
-            opponentRangeFrom: $('#rangeFrom').val(),
-            opponentRangeTo: $('#rangeTo').val(),
+            opponentSelectionRange: parseInt($('#selectRange').val()),
+            opponentRangeFrom: parseInt($('#rangeFrom').val()),
+            opponentRangeTo: parseInt($('#rangeTo').val()),
             numOpponents: readNumOpponentsFromForm()
         };
     }

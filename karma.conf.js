@@ -10,12 +10,22 @@ module.exports = function(config) {
 
     // frameworks to use
     // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
-    frameworks: ['mocha'],
+    frameworks: ['jasmine'],
 
 
     // list of files / patterns to load in the browser
     files: [
-      'js/**/*.js',
+      'test/mock/chromeRuntime.js',
+      'app/bower_components/jquery/dist/jquery.min.js',
+      'app/scripts/QueryStringHelper.js',
+      'app/scripts/DomUtils.js',
+      'app/scripts/IdeDomManipulator.js',
+      'app/scripts/BatchRunOptions.js',
+      'app/scripts/BatchRunRecorder.js',
+      'app/scripts/BatchResultsReporter.js',
+      'app/scripts/BatchRunner.js',
+      'app/scripts/MatchGenerator.js',
+      'app/scripts/IdeActions.js',
       'test/**/*Spec.js'
     ],
 

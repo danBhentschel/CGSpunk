@@ -1,5 +1,5 @@
 var IdeActions =
-(function(options, runner) {
+(function(options, runner, generator) {
     'use strict';
 
     var g_runContext;
@@ -115,7 +115,7 @@ var IdeActions =
                 params.initialAgents = runData.currentPlayers;
                 return runData;
             })
-            .then(runData => addMatchesToParams(runData, params));
+            .then(runData => generator.addMatchesToParams(runData, params));
     }
 
     function addMyAgentsToRunData(runData, params) {
@@ -179,92 +179,6 @@ var IdeActions =
             });
     }
 
-    function addMatchesToParams(runData, params) {
-        if (!!params.matches && params.matches.length > 0) return params;
-
-        let matches = [];
-
-        for (let i = 0; i < params.iterations; i++)
-            matches = addMatchesForIteration(matches, i, runData, params);
-
-        params.matches = matches;
-
-        return params;
-    }
-
-    function addMatchesForIteration(matches, iteration, runData, params) {
-        let opponents = params.opponentSelectionType === 'current'
-            ? getCurrentOpponents(runData)
-            : getRandomOpponents(runData, params.numOpponents);
-
-        let players = opponents.slice(0);
-        let ide = runData.myAgents.ide;
-        let swapNum = 0;
-        let autoGameOptions = true;
-        players.splice(0, 0, ide);
-        do {
-            matches.push(newMatch(players, autoGameOptions, 'ide', swapNum, iteration));
-            autoGameOptions = false;
-            players = players.slice(0);
-            players.unshift(players.pop());
-            swapNum++;
-        } while (params.swapEnabled &&
-                 players[0].pseudo != ide.pseudo);
-
-        if (!params.arenaCodeEnabled) return matches;
-
-        players = opponents.slice(0);
-        swapNum = 0;
-        players.splice(0, 0, runData.myAgents.arena);
-        do {
-            matches.push(newMatch(players, false, 'arena', swapNum, iteration));
-            players = players.slice(0);
-            players.unshift(players.pop());
-            swapNum++;
-        } while (params.swapEnabled &&
-                 players[0].pseudo != ide.pseudo);
-
-        return matches;
-    }
-
-    function getCurrentOpponents(runData) {
-        let me = runData.myAgents.ide.pseudo;
-        return runData.currentPlayers.filter(player => isNotMe(player, me));
-    }
-
-    function isNotMe(player, me) {
-        if (player.pseudo === me) return false;
-        if (!player.codingamer) return true;
-        return player.codingamer.pseudo !== me;
-    }
-
-    function getRandomOpponents(runData, num) {
-        let opponents = [];
-        let candidates = runData.candidateAgents.slice(0);
-        for (let i = 0; i < num; i++) {
-            if (candidates.length === 0) break;
-            var opponentNum = getRandomOpponentNum(candidates);
-            opponents.push(candidates[opponentNum]);
-            candidates.splice(opponentNum, 1);
-        }
-
-        return opponents;
-    }
-
-    function getRandomOpponentNum(candidates) {
-        return Math.floor(Math.random() * candidates.length);
-    }
-
-    function newMatch(players, autoGameOptions, type, swapNum, iteration) {
-        return {
-            iteration: iteration,
-            gameOptions: autoGameOptions ? '**auto' : '**manual',
-            agents: players,
-            type: type,
-            swapNum: swapNum
-        };
-    }
-
     function stopBatch() {
         runner.stopBatch(g_runContext);
     }
@@ -288,4 +202,4 @@ var IdeActions =
         actions.getGameScores = getGameScores;
         actions.getGameEndState = getGameEndState;
     };
-})(BatchRunOptions, BatchRunner);
+})(BatchRunOptions, BatchRunner, MatchGenerator);

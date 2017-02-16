@@ -34,6 +34,7 @@
         "scripts/BatchRunRecorder.js",
         "scripts/BatchResultsReporter.js",
         "scripts/BatchRunner.js",
+        "scripts/MatchGenerator.js",
         "scripts/IdeActions.js",
         "scripts/contentscript.js",
         "scripts/contentscript_ide.js"
