@@ -181,8 +181,10 @@ var __CGSpunk_Injected =
     function getGameScoresForHypersonic(gameManager) {
         let drawer = gameManager.drawer.drawer;
         let numBoxes = drawer.initData.boxes.length;
+        let agentIds = gameManager.agents.map(_ => _.agentId);
         return drawer.scope.playerInfo.map(_ => { return {
             name: _.name,
+            agentId: agentIds[_.index],
             score: _.score % 100,
             max: numBoxes
         }; });
@@ -191,6 +193,7 @@ var __CGSpunk_Injected =
     function getGameScoresForFantasticBits(gameManager) {
         let index = 5;
         let agentNames = gameManager.agents.map(_ => _.name);
+        let agentIds = gameManager.agents.map(_ => _.agentId);
         let lastFrameData = gameManager.views[gameManager.views.length-1].split('\n');
         index += 1 + parseInt(lastFrameData[index], 10);
         let numSnaffles = parseInt(lastFrameData[index], 10);
@@ -201,6 +204,7 @@ var __CGSpunk_Injected =
             var score = parseInt(scores[i], 10);
             return {
                 name: _,
+                agentId: agentIds[i],
                 score: score >= 0 ? score : 0,
                 max: numSnaffles
             };
@@ -210,8 +214,10 @@ var __CGSpunk_Injected =
     function getGameScoresForCodeBusters(gameManager) {
         let drawer = gameManager.drawer.drawer;
         let numGhosts = parseInt(drawer.initData.ghostCount, 10);
+        let agentIds = gameManager.agents.map(_ => _.agentId);
         return drawer.scope.playerInfo.map(_ => { return {
             name: _.name,
+            agentId: agentIds[_.index],
             score: _.score >= 0 ? _.score : 0,
             max: numGhosts
         }; });

@@ -26,7 +26,7 @@ function addMatch(results, tabId) {
     $('#numMatches').text(g_matchNum + ' / ' + totalMatches);
 
     addRowToTable(match, results, tabId);
-    updateSummary(results);
+    updateSummary(match, results);
 
     if (g_matchNum === totalMatches) showBatchButton(results);
 }
@@ -75,9 +75,9 @@ function addRowToTable(match, results, tabId) {
     row += replayButtonCell();
     row += sendToIdeButtonCell();
     row += runLabelCell(match, results);
-    row += playersLabelCell(match);
+    row += playersLabelCell(match, results.userName);
     row += scoresCell(match);
-    row += winnerLabelCell(match.results.rankings);
+    row += winnerLabelCell(match, results.userName);
     row += stderrLinkCell();
     row += '</tr>';
 
@@ -145,16 +145,16 @@ function runLabelCell(match, results) {
     return '<td>' + runLabel + '</td>';
 }
 
-function playersLabelCell(match) {
-    let players = match.results.rankings.map(_ => playerLabel(_, match));
+function playersLabelCell(match, userName) {
+    let players = match.results.rankings.map(_ => playerLabel(_, match, userName));
     return '<td>' + players.join('<br />') + '</td>';
 }
 
 function scoresCell(match) {
     if (!match.scores) return '<td style="display:none;"></td>';
-    let playerNameOrder = match.results.rankings.map(_ => _.name);
-    let scores = playerNameOrder.map(name => {
-        let entry = match.scores.find(_ => _.name === name);
+    let playerIdOrder = match.results.rankings.map(_ => _.agentId);
+    let scores = playerIdOrder.map(agentId => {
+        let entry = match.scores.find(_ => _.agentId === agentId);
         if (!entry) return '???';
         if (!entry.max) return entry.score;
         return entry.score + '&nbsp;/&nbsp;' + entry.max;
@@ -162,10 +162,12 @@ function scoresCell(match) {
     return '<td>' + scores.join('<br />') + '</td>';
 }
 
-function playerLabel(player, match) {
-    let agent = match.data.agents.find(_ => nameForAgent(_) === player.name);
-    if (agent && agent.rank) return player.name + ' [' + agent.rank + ']';
-    return player.name;
+function playerLabel(player, match, userName) {
+    let agent = match.data.agents.find(_ => _.agentId === player.agentId);
+    let playerName = player.name;
+    if (playerName === userName && player.agentId === -1) return `${playerName} [IDE]`;
+    if (agent && agent.rank) return `${playerName} [${agent.rank}]`;
+    return playerName;
 }
 
 function nameForAgent(agent) {
@@ -175,10 +177,10 @@ function nameForAgent(agent) {
     return 'Default';
 }
 
-function winnerLabelCell(rankings) {
-    let winners = getWinnersForRankings(rankings);
+function winnerLabelCell(match, userName) {
+    let winners = getWinnersForRankings(match.results.rankings);
     if (winners.length > 1) return '<td>' + chrome.i18n.getMessage('tiedMatch') + '</td>';
-    return '<td>' + winners[0].name + '</td>';
+    return '<td>' + playerLabel(winners[0], match, userName) + '</td>';
 }
 
 function getWinnersForRankings(rankings) {
@@ -232,13 +234,13 @@ function findEntryByName(rankings, name) {
     return rankings.find(_ => _.name === name);
 }
 
-function updateSummary(results) {
-    let userName = results.userName;
-    let matches = results.matches.map(_ => calcMatchInfo(_, userName));
+function updateSummary(match, results) {
+    let myAgentId = getMyAgentId(results, match);
+    let matchInfos = results.matches.map(_ => calcMatchInfo(_, myAgentId));
+    let matchInfo = matchInfos[g_matchNum-1];
 
-    let match = matches[matches.length-1];
-    let swapNum = match.swapNum;
-    let type = match.type;
+    let swapNum = matchInfo.swapNum;
+    let type = matchInfo.type;
 
     let typeId = type === 'ide'
         ? 'Ide' : (type === 'arena' ? 'Arena' : '');
@@ -249,47 +251,55 @@ function updateSummary(results) {
     let avgPosId = '#average' + typeId + 'Placement';
     let avgScoreId = '#average' + typeId + 'Score';
 
-    let wins = findMatchesOfStatus(matches, swapNum, type, 'w').length;
-    let losses = findMatchesOfStatus(matches, swapNum, type, 'l').length;
-    let ties = findMatchesOfStatus(matches, swapNum, type, 't').length;
+    let wins = findMatchesOfStatus(matchInfos, swapNum, type, 'w').length;
+    let losses = findMatchesOfStatus(matchInfos, swapNum, type, 'l').length;
+    let ties = findMatchesOfStatus(matchInfos, swapNum, type, 't').length;
 
     $(winsId).text(wins);
     $(lossesId).text(losses);
     $(tiesId).text(ties);
 
-    addSwapSignificantRuns(results, matches);
-    addCodeSignificantRuns(results, matches);
+    addSwapSignificantRuns(results, matchInfos);
+    addCodeSignificantRuns(results, matchInfos);
 
     let avgPosElement = $(avgPosId);
     if (avgPosElement.is(':visible'))
-        avgPosElement.text(calcAveragePlacementInfo(results.matches, userName, type));
+        avgPosElement.text(calcAveragePlacementInfo(results.matches, myAgentId, type));
 
     let avgScoreElement = $(avgScoreId);
     if (avgScoreElement.is(':visible'))
-        avgScoreElement.text(calcAverageScoreInfo(results.matches, userName, type));
+        avgScoreElement.text(calcAverageScoreInfo(results.matches, myAgentId, type));
 }
 
-function calcMatchInfo(match, userName) {
+function getMyAgentId(results, match) {
+    var myRankings = match.results.rankings.filter(_ => _.name === results.userName);
+    if (myRankings.length === 0) return -1;
+    if (myRankings.length > 1 &&
+        myRankings.filter(_ => _.agentId === -1).length > 0) return -1;
+    return myRankings[0].agentId;
+}
+
+function calcMatchInfo(match, myAgentId) {
     return {
         iteration: match.data.iteration,
         swapNum: match.data.swapNum,
         type: match.data.type,
-        status: calcMatchStatus(match, userName)
+        status: calcMatchStatus(match, myAgentId)
     };
 }
 
-function calcMatchStatus(match, userName) {
+function calcMatchStatus(match, myAgentId) {
     let rankings = match.results.rankings;
     let winners = getWinnersForRankings(rankings);
 
-    if (winners.length === 1) return winners[0].name === userName ? 'w' : 'l';
-    return winners.filter(_ => _.name === userName).length ? 't' : 'l';
+    if (winners.length === 1) return winners[0].agentId === myAgentId ? 'w' : 'l';
+    return winners.filter(_ => _.agentId === myAgentId).length ? 't' : 'l';
 }
 
-function calcAveragePlacementInfo(matches, userName, type) {
+function calcAveragePlacementInfo(matches, myAgentId, type) {
     let placements = matches.filter(_ => _.data.type === type)
         .map(match => {
-            let value = match.results.rankings.find(_ => _.name === userName).rank;
+            let value = match.results.rankings.find(_ => _.agentId === myAgentId).rank;
             let count = match.results.rankings.filter(_ => _.rank == value).length;
             for (let i = 1; i < count; i++) value += value + i;
             return value / count;
@@ -298,13 +308,13 @@ function calcAveragePlacementInfo(matches, userName, type) {
     return (sum / placements.length).toFixed(2);
 }
 
-function calcAverageScoreInfo(matches, userName, type) {
+function calcAverageScoreInfo(matches, myAgentId, type) {
     let isPercent = false;
     let filteredMatches = matches.filter(_ => _.data.type === type);
     let scores = filteredMatches.map(match => 
-            match.scores.find(_ => _.name === userName).score);
+            match.scores.find(_ => _.agentId === myAgentId).score);
     let pool = filteredMatches.map(match => 
-            match.scores.find(_ => _.name === userName).max);
+            match.scores.find(_ => _.agentId === myAgentId).max);
     let sum = scores.reduce((a, b) => a + b);
     let total = pool.reduce((a, b) => a + b);
     if (total > 0) return Math.round(sum * 100 / total) + '%';
