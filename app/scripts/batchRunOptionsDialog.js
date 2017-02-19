@@ -4,6 +4,9 @@
     var numPlayerSlots = 2;
     var inArena = true;
 
+    var isFirefox = typeof InstallTrigger !== 'undefined';
+    var storageLocation = isFirefox ? chrome.storage.local : chrome.storage.sync;
+
     $(document).ready(() => {
         numPlayerSlots = parseInt(QueryStringHelper.getParameter(document.URL, 'numPlayerSlots'), 10);
         inArena = QueryStringHelper.getParameter(document.URL, 'inArena') === 'true';
@@ -27,7 +30,7 @@
 
         if ($('#advancedTabs > li.active > a').is('#formTab')) {
             options = readOptionsFromForm();
-            chrome.storage.sync.set(options);
+            storageLocation.set(options);
         } else {
             options = JSON.parse($('#json').val());
         }
@@ -81,7 +84,7 @@
     };
 
     function loadSavedValuesFromStorage() {
-        chrome.storage.sync.get(defaultStorageValues, insertSavedValuesIntoForm);
+        storageLocation.get(defaultStorageValues, insertSavedValuesIntoForm);
     }
 
     function insertSavedValuesIntoForm(items) {
