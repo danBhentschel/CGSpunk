@@ -5,6 +5,8 @@
     var inArena = true;
 
     var isFirefox = typeof InstallTrigger !== 'undefined';
+    var isEdge = !!window.StyleMedia;
+
     var storageLocation = isFirefox ? chrome.storage.local : chrome.storage.sync;
 
     $(document).ready(() => {
@@ -42,7 +44,14 @@
             options: options
         });
 
-        window.close();
+        // http://stackoverflow.com/a/8135456/3119991
+        if (isEdge) {
+            var objWin = window.self;
+            objWin.open('','_self','');
+            objWin.close();
+        } else {
+            window.close();
+        }
     }
 
     function readOptionsFromForm() {
