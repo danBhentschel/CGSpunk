@@ -28,6 +28,7 @@ module.exports = function(config) {
       'app/scripts/MatchGenerator.js',
       'app/scripts/IdeActions.js',
       'app/scripts/Injected.js',
+      'app/scripts/batchRunResultsDialog.js',
       'test/**/*Spec.js'
     ],
 
