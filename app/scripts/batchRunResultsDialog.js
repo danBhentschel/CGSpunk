@@ -122,8 +122,8 @@ function sendToIdeButtonCell() {
 }
 
 function runLabelCell(match, results) {
-    let iteration = match.data.iteration + 1;
-    let swapNum = match.data.swapNum + 1;
+    let iteration = (match.data.iteration + 1).toString();
+    let swapNum = (match.data.swapNum + 1).toString();
     let type = match.data.type;
 
     let runLabel = iteration;
