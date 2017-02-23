@@ -30,7 +30,7 @@ Or to run continuously while developing (recommended):
 
 ## Building
 
-`> gulp build`
+`> gulp build [--chrome, --firefox, --edge]`
 
 To make a zip file:
 

@@ -1,9 +1,14 @@
 {
     "name": "__MSG_appName__",
-    "version": "0.2.12",
+    "version": "0.2.13",
     "manifest_version": 2,
     "description": "__MSG_appDescription__",
     "author": "danBhentschel",
+    "applications": {
+        "gecko": {
+            "id": "{bc721ec4-4c50-4075-85fb-28e62b7ed41b}"
+        }
+    },
     "icons": {
         "16": "images/CGSpunk_16.png",
         "19": "images/CGSpunk_19.png",
@@ -12,8 +17,10 @@
     },
     "default_locale": "en",
     "background": {
-        "page": "background.html",
-        "persistent": true
+        "scripts": [
+            "scripts/background.js",
+            "scripts/chromereload.js"
+        ]
     },
     "permissions": [
         "storage",

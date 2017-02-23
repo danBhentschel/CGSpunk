@@ -19,6 +19,7 @@
     "gulp-imagemin": "^2.4.0",
     "gulp-livereload": "^3.8.1",
     "gulp-load-plugins": "^1.2.0",
+    "gulp-merge-json": "^1.0.0",
     "gulp-size": "^2.1.0",
     "gulp-sourcemaps": "^1.6.0",
     "gulp-uglify": "^1.5.3",
@@ -31,7 +32,8 @@
     "karma-jasmine": "^1.1.0",
     "main-bower-files": "^2.11.1",
     "run-sequence": "^1.1.5",
-    "wiredep": "^4.0.0"
+    "wiredep": "^4.0.0",
+    "yargs": "^6.6.0"
   },
   "eslintConfig": {
     "env": {

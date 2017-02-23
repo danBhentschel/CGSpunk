@@ -5,24 +5,29 @@ import del from 'del';
 import runSequence from 'run-sequence';
 import {stream as wiredep} from 'wiredep';
 var gutil = require('gulp-util');
+var argv = require('yargs').argv;
+var isChrome = !!argv.chrome || (!argv.firefox && !argv.edge);
+var isFirefox = !!argv.firefox && !isChrome;
+var isEdge = !!argv.edge && !(isChrome || isFirefox);
 
 const $ = gulpLoadPlugins();
 
 gulp.task('extras', () => {
-  return gulp.src([
-    'app/*.*',
+  var srcs = [
     'app/_locales/**',
     'app/bower_components/bootstrap/dist/css/bootstrap.min.css',
     'app/bower_components/bootstrap/dist/js/bootstrap.min.js',
     'app/bower_components/bootstrap/dist/fonts/**',
     'app/bower_components/font-awesome/css/font-awesome.min.css',
     'app/bower_components/font-awesome/fonts/**',
-    'app/scripts/*Dialog.js',
-    'app/scripts/*Helper.js',
-    'app/scripts/Injected.js',
-    '!app/*.json',
-    '!app/**/*.html',
-  ], {
+    'app/bower_components/jquery/dist/jquery.min.js',
+    'app/scripts/*.js'
+  ];
+  if (isEdge) {
+    srcs.push('app/background.html');
+    srcs.push('app/*APIBridge.js');
+  }
+  return gulp.src(srcs, {
     base: 'app',
     dot: true
   }).pipe(gulp.dest('dist'));
@@ -59,7 +64,7 @@ gulp.task('images', () => {
 });
 
 gulp.task('html',  () => {
-  return gulp.src('app/**/*.html')
+  return gulp.src('app/dialogs/*.html')
     .pipe($.useref({searchPath: ['.tmp', 'app', '.']}))
     .pipe($.sourcemaps.init())
     // uglify doesn't seem to support ES6 syntax (arrow functions)
@@ -67,26 +72,7 @@ gulp.task('html',  () => {
     .pipe($.if('*.css', $.cleanCss({compatibility: '*'})))
     .pipe($.sourcemaps.write())
     .pipe($.if('*.html', $.htmlmin({removeComments: true, collapseWhitespace: true})))
-    .pipe(gulp.dest('dist'));
-});
-
-gulp.task('chromeManifest', () => {
-  return gulp.src('app/manifest.json')
-    .pipe($.chromeManifest({
-      buildnumber: false,
-      background: {
-        target: 'scripts/background.js',
-        exclude: [
-          'scripts/chromereload.js'
-        ]
-      }
-  }))
-  .pipe($.if('*.css', $.cleanCss({compatibility: '*'})))
-  .pipe($.if('*.js', $.sourcemaps.init()))
-  // uglify doesn't seem to support ES6 syntax (arrow functions)
-  //.pipe($.if('*.js', $.uglify())).on('error', gutil.log)
-  .pipe($.if('*.js', $.sourcemaps.write('.')))
-  .pipe(gulp.dest('dist'));
+    .pipe(gulp.dest('dist/dialogs'));
 });
 
 gulp.task('clean', del.bind(null, ['.tmp', 'dist']));
@@ -125,9 +111,38 @@ gulp.task('package', function () {
       .pipe(gulp.dest('package'));
 });
 
+gulp.task('manifestJson', () => {
+  gulp.src('app/manifest.json')
+    .pipe($.mergeJson({
+      fileName: 'manifest.json',
+      edit: (parsedJson, file) => {
+        if (!isFirefox && !!parsedJson.applications) {
+          delete parsedJson.applications;
+        }
+        if (isEdge) {
+          parsedJson.background = {
+            page: 'background.html',
+            persistent: true
+          };
+        } else {
+          if (!!parsedJson['-ms-preload']) {
+            delete parsedJson['-ms-preload'];
+          }
+          var chromeReloadIndex =
+            parsedJson.background.scripts.indexOf('scripts/chromereload.js');
+          if (chromeReloadIndex > -1) {
+            parsedJson.background.scripts.splice(chromeReloadIndex, 1);
+          }
+        }
+        return parsedJson;
+      }
+    }))
+    .pipe(gulp.dest('dist'));
+});
+
 gulp.task('build', (cb) => {
   runSequence(
-    'lint', 'chromeManifest',
+    'clean', 'lint', 'manifestJson',
     ['html', 'images', 'extras'],
     'size', cb);
 });
