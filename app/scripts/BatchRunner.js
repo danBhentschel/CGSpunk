@@ -28,6 +28,8 @@ var BatchRunner =
 
     function doMatch(context) {
         if (context.matchNum > context.matches.length-1 || context.stop) {
+            reporter.batchStopped(context.results);
+            dom.buttonStop();
             dom.toggleBatchButtons();
             context.ideActions.addAgents(context.params.initialAgents);
             return;
@@ -71,7 +73,15 @@ var BatchRunner =
     }
 
     function stopBatch(context) {
+        dom.buttonStopping();
+        reporter.batchStopping(g_instanceNum);
         context.stop = true;
+    }
+
+    function stopBatchForInstance(instanceNum, context) {
+        if (instanceNum === g_instanceNum) {
+            stopBatch(context);
+        }
     }
 
     return new function() {
@@ -79,5 +89,6 @@ var BatchRunner =
 
         runner.runBatch = runBatch;
         runner.stopBatch = stopBatch;
+        runner.stopBatchForInstance = stopBatchForInstance;
     };
 })(IdeDomManipulator, BatchRunRecorder, BatchResultsReporter);

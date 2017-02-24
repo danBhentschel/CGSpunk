@@ -187,6 +187,12 @@ var IdeActions =
         runner.stopBatch(g_runContext);
     }
 
+    chrome.runtime.onMessage.addListener((request, sender) => {
+        if (request.action === 'stopBatch') {
+            runner.stopBatchForInstance(request.instanceNum, g_runContext);
+        }
+    });
+
     return new function() {
         let actions = this;
 

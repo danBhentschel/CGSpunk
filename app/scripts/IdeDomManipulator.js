@@ -66,6 +66,24 @@ var IdeDomManipulator =
     }
 
     // public
+    function buttonStop() {
+        return new Promise(resolve => {
+            $('#cgspkStopBatchButton').html(chrome.i18n.getMessage('btnStopBatch'));
+            $('#cgspkStopBatchButton').prop('disabled', false);
+            resolve();
+        });
+    }
+
+    // public
+    function buttonStopping() {
+        return new Promise(resolve => {
+            $('#cgspkStopBatchButton').html(chrome.i18n.getMessage('btnStoppingBatch'));
+            $('#cgspkStopBatchButton').prop('disabled', true);
+            resolve();
+        });
+    }
+
+    // public
     function clickPlayButton() {
         return new Promise(resolve => {
             $('.play').click();
@@ -99,6 +117,8 @@ var IdeDomManipulator =
         manipulator.createBatchButton = createBatchButton;
         manipulator.createStopButton = createStopButton;
         manipulator.toggleBatchButtons = toggleBatchButtons;
+        manipulator.buttonStopping = buttonStopping;
+        manipulator.buttonStop = buttonStop;
 
         // Batch methods
         manipulator.clickPlayButton = clickPlayButton;

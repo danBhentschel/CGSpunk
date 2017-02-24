@@ -2,19 +2,44 @@ var __CGSpunk_batchRunResultsDialog =
 (function() {
     'use strict';
 
-    var g_instanceNum = QueryStringHelper.getParameter(document.URL, 'instanceNum');
+    var g_instanceNum = parseInt(QueryStringHelper.getParameter(document.URL, 'instanceNum'));
+    var g_tabId = parseInt(QueryStringHelper.getParameter(document.URL, 'tabId'));
     var g_batchNum = -1;
     var g_matchNum;
     
     chrome.runtime.onMessage.addListener((request, sender) => {
         if (request.action === 'updateResultsWindow') {
-            addMatch(request.results, sender.tab.id);
+            addMatch(request.results);
+        }
+        if (request.action === 'batchStopped' &&
+                request.results.instanceNum === g_instanceNum) {
+            showBatchButton(request.results);
+        }
+        if (request.action === 'batchStopping' &&
+                request.instanceNum === g_instanceNum) {
+            batchStopping();
         }
     });
+
+    $( document ).ready(() => {
+        $('#batchBtn').html(chrome.i18n.getMessage('btnStopBatch'));
+        $('#divBatchBtn').on('click', '#batchBtn', () => {
+            chrome.tabs.sendMessage(g_tabId, {
+                action: 'stopBatch',
+                instanceNum: g_instanceNum
+            });
+        });
+    });
+
+    function batchStopping() {
+        let button = $('#batchBtn');
+        button.html(chrome.i18n.getMessage('btnStoppingBatch'));
+        button.prop('disabled', true);
+    }
     
-    function addMatch(results, tabId) {
+    function addMatch(results) {
         if (g_batchNum === -1) g_batchNum = results.batchNum;
-        if (g_instanceNum != results.instanceNum) return;
+        if (g_instanceNum !== results.instanceNum) return;
         if (g_batchNum != results.batchNum) return;
     
         g_matchNum = results.matches.length;
@@ -27,7 +52,7 @@ var __CGSpunk_batchRunResultsDialog =
         if (g_matchNum === 1) showSummary(results, hasScores);
         $('#numMatches').text(g_matchNum + ' / ' + totalMatches);
     
-        addRowToTable(match, results, tabId);
+        addRowToTable(match, results);
         updateSummary(match, results);
     
         if (g_matchNum === totalMatches) showBatchButton(results);
@@ -71,7 +96,7 @@ var __CGSpunk_batchRunResultsDialog =
         }
     }
     
-    function addRowToTable(match, results, tabId) {
+    function addRowToTable(match, results) {
         let row = '<tr>';
         row += crashButtonCell(match.results);
         row += replayButtonCell();
@@ -85,7 +110,7 @@ var __CGSpunk_batchRunResultsDialog =
     
         let tbody = $('#resultsTable tbody');
         tbody.append(row);
-        addButtonEventHandlers(tbody, match, tabId);
+        addButtonEventHandlers(tbody, match);
         enableButtonTooltips();
     }
     
@@ -194,7 +219,7 @@ var __CGSpunk_batchRunResultsDialog =
             chrome.i18n.getMessage('btnStderr') + '</button></td>';
     }
     
-    function addButtonEventHandlers(tbody, match, tabId) {
+    function addButtonEventHandlers(tbody, match) {
         if (match.results.crash) {
             tbody.on('click', '#crashBtn' + g_matchNum, () => {
                 chrome.runtime.sendMessage({
@@ -205,7 +230,7 @@ var __CGSpunk_batchRunResultsDialog =
         }
     
         tbody.on('click', '#sendToIdeBtn' + g_matchNum, () => {
-            chrome.tabs.sendMessage(tabId, {
+            chrome.tabs.sendMessage(g_tabId, {
                 action: 'sendToIde',
                 options: match.data.gameOptions,
                 agents: match.data.agents
@@ -399,12 +424,13 @@ var __CGSpunk_batchRunResultsDialog =
     }
 
     function showBatchButton(results) {
-        let button = $('#divBatchBtn');
+        let buttonDiv = $('#divBatchBtn');
+        let button = $('#batchBtn');
+        button.html(chrome.i18n.getMessage('btnSaveBatch'));
+        button.prop('disabled', false);
     
-        button.css('margin-top', button.parent().height() - button.height())
-        button.show();
-    
-        button.on('click', '#batchBtn', () => {
+        buttonDiv.off('click', '#batchBtn');
+        buttonDiv.on('click', '#batchBtn', () => {
             chrome.runtime.sendMessage({
                 action: 'showBatchData',
                 data: {

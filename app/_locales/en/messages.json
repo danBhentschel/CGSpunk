@@ -93,9 +93,17 @@
     "message": "BATCH_RUN",
     "description": "Button to run matches and record results"
   },
+  "btnSaveBatch": {
+    "message": "Save batch",
+    "description": "Button to save a completed batch run"
+  },
   "btnStopBatch": {
     "message": "STOP",
     "description": "Button to stop a batch run in progress"
+  },
+  "btnStoppingBatch": {
+    "message": "STOPPING...",
+    "description": "Label while batch is stopping"
   },
   "defaultOrderLabel": {
     "message": "Default order",
