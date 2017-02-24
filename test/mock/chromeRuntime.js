@@ -3,5 +3,8 @@ chrome = {
         onMessage: {
             addListener: () => {}
         }
+    },
+    i18n: {
+        getMessage: () => { return ''; }
     }
 }

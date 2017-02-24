@@ -97,7 +97,8 @@ var __CGSpunk_batchRunResultsDialog =
     }
     
     function addRowToTable(match, results) {
-        let row = '<tr>';
+        let matchInfo = calcMatchInfo(match, getMyAgentId(results, match));
+        let row = `<tr id="${matchUri(results, matchInfo)}">`;
         row += crashButtonCell(match.results);
         row += replayButtonCell();
         row += sendToIdeButtonCell();
@@ -121,13 +122,13 @@ var __CGSpunk_batchRunResultsDialog =
                 '"><span class="glyphicon glyphicon-exclamation-sign" /></button></td>';
         }
     
-        if (matchResults.endState == 'invalid') {
+        if (matchResults.endState === 'invalid') {
             return '<td><button type="button" class="btn btn-danger" id="invalidBtn' + g_matchNum + 
                 '" data-toggle="tooltip" title="' + chrome.i18n.getMessage('invalidToolTip') +
                 '"><span class="glyphicon glyphicon-question-sign" /></button></td>';
         }
     
-        if (matchResults.endState == 'timeout') {
+        if (matchResults.endState === 'timeout') {
             return '<td><button type="button" class="btn btn-danger" id="timeoutBtn' + g_matchNum + 
                 '" data-toggle="tooltip" title="' + chrome.i18n.getMessage('timeoutToolTip') +
                 '"><span class="glyphicon glyphicon-time" /></button></td>';
@@ -288,6 +289,7 @@ var __CGSpunk_batchRunResultsDialog =
     
         addSwapSignificantRuns(results, matchInfos);
         addCodeSignificantRuns(results, matchInfos);
+        addFailedMatches(results, matchInfos);
     
         let avgPosElement = $(avgPosId);
         if (avgPosElement.is(':visible'))
@@ -315,7 +317,8 @@ var __CGSpunk_batchRunResultsDialog =
             iteration: match.data.iteration,
             swapNum: match.data.swapNum,
             type: match.data.type,
-            status: calcMatchStatus(match, myAgentId)
+            status: calcMatchStatus(match, myAgentId),
+            errored: !!match.results.crash || match.results.endState !== 'normal'
         };
     }
     
@@ -365,21 +368,23 @@ var __CGSpunk_batchRunResultsDialog =
         if (lastMatch.swapNum !== results.numOpponents) return;
         let type = lastMatch.type;
     
-        let significantRuns = getListOfRunsWhereStartPositionIsSignificant(matchInfos, type);
+        let significantRuns = getListOfRunsWhereStartPositionIsSignificant(results, matchInfos, type);
         if (significantRuns.length === 0) return;
     
         $(`#${type}SignificantRuns`).show();
-        $(`#${type}SignificantRunsVal`).text(significantRuns.join(', '));
+        $(`#${type}SignificantRunsVal`).html(significantRuns.join(', '));
     }
 
-    function getListOfRunsWhereStartPositionIsSignificant(matchInfos, type) {
+    function getListOfRunsWhereStartPositionIsSignificant(results, matchInfos, type) {
         let maxIteration = matchInfos[matchInfos.length-1].iteration;
 
         let runs = [];
 
         for (let i = 0; i <= maxIteration; i++) {
             let filteredInfos = matchInfos.filter(_ => _.iteration == i && _.type == type);
-            if (isSignificantMatchSet(filteredInfos)) runs.push((i+1).toString());
+            if (isSignificantMatchSet(filteredInfos)) {
+                runs.push(`<a href="#${matchUri(results, filteredInfos[0])}">${i+1}</a>`);
+            }
         }
 
         return runs;
@@ -392,7 +397,7 @@ var __CGSpunk_batchRunResultsDialog =
         if (significantRuns.length === 0) return;
     
         $('#codeSignificantRuns').show();
-        $('#codeSignificantRunsVal').text(significantRuns.join(', '));
+        $('#codeSignificantRunsVal').html(significantRuns.join(', '));
     }
     
     function getListOfRunsWhereCodeVersionIsSignificant(results, matchInfos) {
@@ -406,9 +411,9 @@ var __CGSpunk_batchRunResultsDialog =
                 let filteredInfos = matchInfos.filter(_ => _.iteration == i && _.swapNum == s);
                 if (!isSignificantMatchSet(filteredInfos)) continue;
                 if (results.swapEnabled) {
-                    runs.push(`${i+1} (pos=${s+1})`);
+                    runs.push(`<a href="#${matchUri(results, filteredInfos[0])}">${i+1} (pos=${s+1})</a>`);
                 } else {
-                    runs.push((i+1).toString());
+                    runs.push(`<a href="#${matchUri(results, filteredInfos[0])}">${i+1}</a>`);
                 }
             }
         }
@@ -423,6 +428,47 @@ var __CGSpunk_batchRunResultsDialog =
                 : (status === _.status ? status : 'x'), null) === 'x';
     }
 
+    function addFailedMatches(results, matchInfos) {
+        let failedMatches = getListOfMatchesWithErrors(results, matchInfos);
+        if (failedMatches.length === 0) return;
+    
+        $('#failedMatches').show();
+        $('#failedMatchesVal').html(failedMatches.join(', '));
+    }
+
+    function getListOfMatchesWithErrors(results, matchInfos) {
+        return matchInfos.filter(_ => _.errored)
+            .map(_ => `<a href="#${matchUri(results, _)}">${matchDescription(results, _)}</a>`);
+    }
+
+    function matchDescription(results, matchInfo) {
+        let iteration = matchInfo.iteration + 1;
+        if (!results.swapEnabled && !results.arenaCodeEnabled) {
+            return iteration;
+        }
+
+        var desc = [];
+        if (results.arenaCodeEnabled) {
+            desc.push(matchInfo.type === 'ide' ? 'IDE' : 'Arena');
+        }
+        if (results.swapEnabled) {
+            desc.push(`pos=${matchInfo.swapNum+1}`);
+        }
+        return `${iteration} (${desc.join(', ')})`;
+    }
+    
+    function matchUri(results, matchInfo) {
+        let iteration = matchInfo.iteration + 1;
+        var desc = [];
+        if (results.arenaCodeEnabled) {
+            desc.push(matchInfo.type === 'ide' ? 'i' : 'a');
+        }
+        if (results.swapEnabled) {
+            desc.push(`p${matchInfo.swapNum+1}`);
+        }
+        return `r${iteration}${desc.join('')}`;
+    }
+    
     function showBatchButton(results) {
         let buttonDiv = $('#divBatchBtn');
         let button = $('#batchBtn');
@@ -492,6 +538,7 @@ var __CGSpunk_batchRunResultsDialog =
     return {
         __FOR_TEST_getListOfRunsWhereCodeVersionIsSignificant: getListOfRunsWhereCodeVersionIsSignificant,
         __FOR_TEST_getListOfRunsWhereStartPositionIsSignificant: getListOfRunsWhereStartPositionIsSignificant,
+        __FOR_TEST_getListOfMatchesWithErrors: getListOfMatchesWithErrors,
         __FOR_TEST_getMatchInfosFromResults: getMatchInfosFromResults
     };
 
