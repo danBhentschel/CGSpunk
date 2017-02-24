@@ -1,0 +1,43 @@
+<!doctype html>
+
+<html>
+<head>
+<title>CG Spunk match game log display</title>
+<link rel="stylesheet" href="../bower_components/bootstrap/dist/css/bootstrap.min.css">
+<script src="../bower_components/jquery/dist/jquery.min.js"></script>
+<script src="../bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+<script src="../scripts/matchGameLogDialog.js"></script>
+</head>
+<body>
+
+<!-- Haven't implemented translation -->
+<div class="container">
+    <h1>Game log for this match</h1>
+
+    <div class="row">
+        <div class="btn-group" data-toggle="buttons" id="selections">
+          <label class="btn btn-primary active">
+            <input type="checkbox" id="labels" autocomplete="off" checked> Labels
+          </label>
+          <label class="btn btn-success active" data-toggle="tooltip" title="To get stdin, log the inputs to stderr between two lines: 'IN' and '/IN'">
+            <input type="checkbox" id="stdin" autocomplete="off" checked> stdin
+          </label>
+          <label class="btn btn-danger active">
+            <input type="checkbox" id="stderr" autocomplete="off" checked> stderr
+          </label>
+          <label class="btn btn-warning active">
+            <input type="checkbox" id="stdout" autocomplete="off" checked> stdout
+          </label>
+          <label class="btn btn-info active">
+            <input type="checkbox" id="summary" autocomplete="off" checked> Summary
+          </label>
+        </div>
+    </div>
+    <div class="row">
+        <pre id="gameLog" style="background-color:white;"></pre>
+    </div>
+</div>
+
+
+</body>
+</html>

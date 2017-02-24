@@ -73,8 +73,8 @@
         }
     }
   },
-  "btnStderr": {
-    "message": "STDERR",
+  "btnGameLog": {
+    "message": "Game log",
     "description": "Link title for the Batch Run results table"
   },
   "replayBtnTip": {

@@ -145,4 +145,36 @@
 
   });
 
+  describe('getGameHistoryFromGameManager()', function () {
+    var gameManager;
+
+    beforeEach(function () {
+      gameManager = {
+        agents: __CodeBustersAgents_1,
+        frames: __CodeBustersFrames_1
+      };
+    });
+
+    it('should have 199 turns of data', function () {
+      var history = __CGSpunk_Injected.__FOR_TEST_getGameHistoryFromGameManager(gameManager);
+      expect(history.data.length).toBe(199);
+    });
+
+    it('should have summary info for each frame', function () {
+      var history = __CGSpunk_Injected.__FOR_TEST_getGameHistoryFromGameManager(gameManager);
+      expect(history.data.filter(_ => !!_.summary).length).toBe(199);
+    });
+
+    it('should have 2 stdout entries for each frame', function () {
+      var history = __CGSpunk_Injected.__FOR_TEST_getGameHistoryFromGameManager(gameManager);
+      expect([].concat.apply([], history.data.map(_ => _.stdout)).filter(_ => !!_).length).toBe(398);
+    });
+
+    it('should have 1 stderr entry for each frame', function () {
+      var history = __CGSpunk_Injected.__FOR_TEST_getGameHistoryFromGameManager(gameManager);
+      expect([].concat.apply([], history.data.map(_ => _.stderr)).filter(_ => !!_).length).toBe(199);
+    });
+
+  });
+
 })();

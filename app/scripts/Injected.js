@@ -248,6 +248,37 @@ var __CGSpunk_Injected =
         return myAgents[0];
     }
 
+    function getGameHistoryFromGameManager(gameManager) {
+        let agentNames = gameManager.agents.map(_ => getNameOfAgent(_));
+        let frames = gameManager.frames;
+        let history = {
+            agents: agentNames,
+            data: []
+        };
+        let frameNo = 1;
+        while (frameNo < frames.length) {
+            let turn = {
+                stdout: [],
+                stderr: []
+            };
+            for (let agent = 0; agent < agentNames.length; agent++) {
+                if (frameNo >= frames.length) {
+                    break;
+                }
+                let frame = frames[frameNo];
+                turn.stdout.push(frame.stdout);
+                turn.stderr.push(frame.stderr);
+                if (!!frame.summary) {
+                    turn.summary = frame.summary;
+                }
+                frameNo++;
+            }
+            history.data.push(turn);
+        }
+
+        return history;
+    }
+
     function stopPlayback() {
         waitForGameManager()
             .then(gameManager => { gameManager.pause(); return gameManager; })
@@ -344,6 +375,7 @@ var __CGSpunk_Injected =
     function getNameOfAgent(agent) {
         if (agent.codingamer) return agent.codingamer.pseudo;
         if (agent.arenaboss) return agent.arenaboss.nickname;
+        if (!!agent.name) return agent.name;
         return 'Default';
     }
 
@@ -486,7 +518,7 @@ var __CGSpunk_Injected =
         return {
             rankings: rankingsForAgents(gameManager.agents),
             options: getMatchOptions(),
-            stderr: getMatchStderr(),
+            history: getGameHistoryFromGameManager(gameManager),
             crash: getCrashInfo(),
             replay: getReplayUrl()
         };
@@ -504,16 +536,6 @@ var __CGSpunk_Injected =
 
     function getMatchOptions() {
         return $('.options-text').val();
-    }
-
-    function getMatchStderr() {
-        let stderr = [];
-
-        $('.stderr > .outputLine').each(function() {
-            stderr.push($(this).text());
-        });
-
-        return stderr;
     }
 
     function getCrashInfo() {
@@ -535,6 +557,7 @@ var __CGSpunk_Injected =
 
     return {
         __FOR_TEST_getMyAgentFromGameManager: getMyAgentFromGameManager,
-        __FOR_TEST_getMyStateFromGameManager: getMyStateFromGameManager
+        __FOR_TEST_getMyStateFromGameManager: getMyStateFromGameManager,
+        __FOR_TEST_getGameHistoryFromGameManager: getGameHistoryFromGameManager
     };
 })();

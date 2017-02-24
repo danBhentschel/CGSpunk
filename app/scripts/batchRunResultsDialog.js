@@ -106,7 +106,7 @@ var __CGSpunk_batchRunResultsDialog =
         row += playersLabelCell(match, results.userName);
         row += scoresCell(match);
         row += winnerLabelCell(match, results.userName);
-        row += stderrLinkCell();
+        row += gameLogLinkCell();
         row += '</tr>';
     
         let tbody = $('#resultsTable tbody');
@@ -215,9 +215,9 @@ var __CGSpunk_batchRunResultsDialog =
         return rankings.filter(_ => _.rank === 1);
     }
     
-    function stderrLinkCell() {
-        return '<td><button type="button" class="btn btn-link" id="stderrBtn' + g_matchNum + '">' +
-            chrome.i18n.getMessage('btnStderr') + '</button></td>';
+    function gameLogLinkCell() {
+        return '<td><button type="button" class="btn btn-link" id="gameLogBtn' + g_matchNum + '">' +
+            chrome.i18n.getMessage('btnGameLog') + '</button></td>';
     }
     
     function addButtonEventHandlers(tbody, match) {
@@ -238,10 +238,10 @@ var __CGSpunk_batchRunResultsDialog =
             });
         });
     
-        tbody.on('click', '#stderrBtn' + g_matchNum, () => {
+        tbody.on('click', '#gameLogBtn' + g_matchNum, () => {
             chrome.runtime.sendMessage({
-                action: 'showMatchStderr',
-                stderr: match.results.stderr
+                action: 'showMatchGameLog',
+                gameLog: match.results.history
             });
         });
     

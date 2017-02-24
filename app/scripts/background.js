@@ -11,14 +11,14 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         g_optionsResponseFunc(request.options);
     } else if (request.action === 'showResultsWindow') {
         showResultsWindow(request.instanceNum, sender.tab.id);
-    } else if (request.action === 'showMatchStderr') {
-        showStderrWindow(request.stderr);
+    } else if (request.action === 'showMatchGameLog') {
+        showGameLogWindow(request.gameLog);
     } else if (request.action === 'showMatchCrashInfo') {
         showCrashInfoWindow(request.crashInfo);
     } else if (request.action === 'showBatchData') {
         showBatchDataWindow(request.data);
-    } else if (request.action === 'getLastStderr') {
-        sendResponse(g_lastStderr);
+    } else if (request.action === 'getLastGameLog') {
+        sendResponse(g_lastGameLog);
     } else if (request.action === 'getLastCrashInfo') {
         sendResponse(g_lastCrashInfo);
     } else if (request.action === 'getLastBatchData') {
@@ -45,12 +45,12 @@ function showResultsWindow(instanceNum, tabId) {
     });
 }
 
-var g_lastStderr;
+var g_lastGameLog;
 
-function showStderrWindow(stderr) {
-    g_lastStderr = stderr;
+function showGameLogWindow(gameLog) {
+    g_lastGameLog = gameLog;
     chrome.windows.create({
-        url: 'dialogs/matchStderr.html',
+        url: 'dialogs/matchGameLog.html',
         type: 'popup',
         width: 600,
         height: 600
