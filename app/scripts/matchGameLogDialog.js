@@ -1,62 +1,88 @@
-'use strict';
+var __CGSpunk_matchGameLogDialog =
+(function() {
+    'use strict';
 
-var g_gameLog;
+    var g_gameLog;
 
-$(document).ready(() => {
-    chrome.runtime.sendMessage({ action: 'getLastGameLog' }, gameLog => {
-        g_gameLog = gameLog;
-        showLogData();
-        $('#stdin').tooltip({ trigger: 'hover' });
-    });
+    $(document).ready(() => {
+        chrome.runtime.sendMessage({ action: 'getLastGameLog' }, gameLog => {
+            g_gameLog = gameLog;
+            showLogData();
+            $('#stdin').tooltip({ trigger: 'hover' });
+        });
 
-    $('#selections').on('change', ':checkbox', function() {
-        showLogData();
+        $('#selections').on('change', ':checkbox', function() {
+            showLogData();
+        });
     });
 
     function showLogData() {
-        let data = [];
-        let showLabels = $('#labels').is(':checked');
-        let showStdin = $('#stdin').is(':checked');
-        let showStderr = $('#stderr').is(':checked');
-        let showStdout = $('#stdout').is(':checked');
-        let showSummary = $('#summary').is(':checked');
         let agents = g_gameLog.agents;
 
-        for (let t = 0; t < g_gameLog.data.length; t++) {
-            let turn = g_gameLog.data[t];
+        let data = parseLog(g_gameLog.data, g_gameLog.agents, {
+            showLabels: $('#labels').is(':checked'),
+            showStdin: $('#stdin').is(':checked'),
+            showStderr: $('#stderr').is(':checked'),
+            showStdout: $('#stdout').is(':checked'),
+            showSummary: $('#summary').is(':checked')
+        });
+
+        $('#gameLog').html(data.map(entry => {
+            return `<span class="text-${entry.class}">${entry.lines}</span>`;
+        }).join('\n'));
+    }
+
+    function parseLog(log, agents, options) {
+        let data = [];
+
+        for (let t = 0; t < log.length; t++) {
+            let turn = log[t];
+
+            if (options.showLabels) {
+                data = addTurnNumberData(data, t+1);
+            }
+
             let stderr = turn.stderr.find(_ => !!_);
-            let stdin = getStdinFromStderr(stderr);
-            if (showLabels) {
-                data.push(`<span class="text-primary"> ** TURN ${t+1}</span>`);
+            if (options.showStdin) {
+                data = addStdinData(data, stderr);
             }
-            if (showStdin && !!stdin) {
-                data.push(`<span class="text-success">${stdin}</span>`);
+
+            if (options.showStderr) {
+                data = addStderrData(data, stderr);
             }
-            if (showStderr && !!stderr) {
-                stderr = stderr.replace(/IN\n[\s\S]*?\/IN\n/g, '').trim();
-                data.push(`<span class="text-danger">${stderr}</span>`);
+
+            if (options.showStdout) {
+                data = addStdoutData(data, agents, turn.stdout, options.showLabels);
             }
-            if (showStdout) {
-                for (let a = 0; a < agents.length; a++) {
-                    let stdout = turn.stdout[a];
-                    if (!stdout) {
-                        continue;
-                    }
-                    if (showLabels) {
-                        data.push(`<span class="text-primary"> ** ${agents[a]}:</span>`);
-                    }
-                    data.push(`<span class="text-warning">${stdout.trim()}</span>`);
-                }
-            }
-            if (showSummary && !!turn.summary) {
-                let summary = turn.summary.replace(/\$(\d)/g, (grp, idx) => {
-                    return agents[idx];
-                }).trim();
-                data.push(`<span class="text-info">${summary}</span>`);
+            if (options.showSummary) {
+                data = addSummaryData(data, turn.summary);
             }
         }
 
-        $('#gameLog').html(data.join('\n'));
+        return data;
+    }
+
+    function addTurnNumberData(data, num) {
+        data.push({
+            class: 'primary',
+            lines: `** TURN ${num}`
+        });
+        return data;
+    }
+
+    function addStdinData(data, stderr) {
+        let stdin = getStdinFromStderr(stderr);
+
+        if (!stdin) {
+            return data;
+        }
+
+        data.push({
+            class: 'success',
+            lines: stdin
+        });
+
+        return data;
     }
 
     function getStdinFromStderr(stderr) {
@@ -65,8 +91,76 @@ $(document).ready(() => {
         }
         let stdin = stderr.match(/IN\n[\s\S]*?\/IN\n/g);
         if (!!stdin) {
-            stdin = stdin.map(_ => _.match(/IN\n([\s\S]*)\/IN\n/)[1]).join('');
+            stdin = stdin.map(_ => _.match(/IN\n([\s\S]*)\/IN\n/)[1]).join('').trim();
         }
-        return stdin.trim();
+        return stdin;
     }
-});
+
+    function addStderrData(data, stderr) {
+        if (!stderr) {
+            return data;
+        }
+
+        let onlyStderr = stderr.replace(/IN\n[\s\S]*?\/IN\n/g, '').trim();
+        data.push({
+            class: 'danger',
+            lines: onlyStderr
+        });
+
+        return data;
+    }
+
+    function addStdoutData(data, agents, stdout, showLabels) {
+        for (let a = 0; a < agents.length; a++) {
+            data = addStdoutDataForAgent(data, agents[a], stdout[a], showLabels);
+        }
+
+        return data;
+    }
+
+    function addStdoutDataForAgent(data, agent, lines, showLabels) {
+        if (!lines) {
+            return data;
+        }
+
+        if (showLabels) {
+            data = addStdoutAgentLabel(data, agent);
+        }
+
+        data.push({
+            class: 'warning',
+            lines: lines.trim()
+        });
+
+        return data;
+    }
+
+    function addStdoutAgentLabel(data, agent) {
+        data.push({
+            class: 'primary',
+            lines: `** ${agent}:`
+        });
+        return data;
+    }
+
+    function addSummaryData(data, summary) {
+        if (!summary) {
+            return data;
+        }
+
+        let formattedSummary = summary.replace(/\$(\d)/g, (grp, idx) => {
+            return agents[idx];
+        }).trim();
+
+        data.push({
+            class: 'info',
+            lines: formattedSummary
+        });
+
+        return data;
+    }
+
+    return {
+        __FOR_TEST_parseLog: parseLog
+    };
+})();
