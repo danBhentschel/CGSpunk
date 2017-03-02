@@ -24,7 +24,8 @@
     },
     "permissions": [
         "storage",
-        "tabs"
+        "tabs",
+        "notifications"
     ],
     "content_scripts": [
         {

@@ -27,14 +27,6 @@ var BatchRunner =
     }
 
     function doMatch(context) {
-        if (context.matchNum > context.matches.length-1 || context.stop) {
-            reporter.batchStopped(context.results);
-            dom.buttonStop();
-            dom.toggleBatchButtons();
-            context.ideActions.addAgents(context.params.initialAgents);
-            return;
-        }
-
         setupMatch(context)
             .then(context.ideActions.playMatch)
             .then(context.ideActions.stopPlayback)
@@ -55,9 +47,21 @@ var BatchRunner =
                         context.results = recorder.recordMatch(context.results, match, scores, results);
                         reporter.reportMatch(context.results);
                         context.matchNum++;
-                        doMatch(context);
+                        nextMatch(context);
                     });
             });
+    }
+
+    function nextMatch(context) {
+        if (context.matchNum > context.matches.length-1 || context.stop) {
+            reporter.batchStopped(context.results);
+            dom.buttonStop();
+            dom.toggleBatchButtons();
+            context.ideActions.addAgents(context.params.initialAgents);
+            return;
+        }
+
+        setTimeout(() => doMatch(context), context.params.pauseBetweenMatches * 1000);
     }
 
     function setupMatch(context) {

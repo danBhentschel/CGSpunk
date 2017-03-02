@@ -63,7 +63,8 @@
             opponentSelectionRange: parseInt($('#selectRange').val()),
             opponentRangeFrom: parseInt($('#rangeFrom').val()),
             opponentRangeTo: parseInt($('#rangeTo').val()),
-            numOpponents: readNumOpponentsFromForm()
+            numOpponents: readNumOpponentsFromForm(),
+            pauseBetweenMatches: parseInt($('#pause').val())
         };
     }
 
@@ -89,7 +90,8 @@
         opponentSelectionRange: 10,
         opponentRangeFrom: 1,
         opponentRangeTo: 10,
-        numOpponents: 1
+        numOpponents: 1,
+        pauseBetweenMatches: 30
     };
 
     function loadSavedValuesFromStorage() {
@@ -103,6 +105,7 @@
         $('#selectRange').val(items.opponentSelectionRange);
         $('#rangeFrom').val(items.opponentRangeFrom);
         $('#rangeTo').val(items.opponentRangeTo);
+        $('#pause').val(items.pauseBetweenMatches);
 
         if (items.opponentSelectionType === 'current') $('#opponentCurrent').tab('show');
         else if (items.opponentSelectionType === 'range') $('#opponentRange').tab('show');
