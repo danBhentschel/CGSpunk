@@ -18,6 +18,7 @@
     "default_locale": "en",
     "background": {
         "scripts": [
+            "scripts/StartupNotification.js",
             "scripts/background.js",
             "scripts/chromereload.js"
         ]

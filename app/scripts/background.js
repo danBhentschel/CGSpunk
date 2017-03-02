@@ -26,26 +26,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     }
 });
 
-chrome.storage.sync.get({ 'newFeatures': 0 }, items => {
-    if (items.newFeatures >= 216) return;
-    chrome.notifications.create('new-features', {
-        type: 'basic',
-        iconUrl: 'images/CGSpunk_128.png',
-        title: 'New in CG Spunk 0.2.16',
-        message: 'At the request of CodinGame staff, CG Spunk now inserts a delay between matches of a batch run.',
-        requireInteraction: true,
-        buttons: [ { title: 'More information' } ]
-    }, notificationId => {
-        chrome.notifications.onButtonClicked.addListener((buttonNotificationId, buttonIndex) => {
-            if (buttonNotificationId === notificationId && buttonIndex == 0) {
-                chrome.tabs.create({ url: 'https://github.com/danBhentschel/CGSpunk/issues/62' });
-            }
-        });
-    });
-    chrome.storage.sync.set({ 'newFeatures': 216 });
-});
-
-
 function showBatchRunOptionsWindow(numPlayerSlots, inArena) {
     chrome.windows.create({
         url: 'dialogs/batchRunOptions.html?numPlayerSlots=' + numPlayerSlots +
