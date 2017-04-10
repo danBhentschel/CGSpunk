@@ -1,6 +1,6 @@
 {
     "name": "__MSG_appName__",
-    "version": "0.2.16",
+    "version": "0.2.17",
     "manifest_version": 2,
     "description": "__MSG_appDescription__",
     "author": "danBhentschel",
@@ -34,7 +34,7 @@
                 "https://www.codingame.com/*"
             ],
             "js": [
-                "bower_components/jquery/dist/jquery.min.js",
+                "downloaded_libs/jquery/jquery.min.js",
                 "scripts/QueryStringHelper.js",
                 "scripts/IdeDomManipulator.js",
                 "scripts/BatchRunOptions.js",

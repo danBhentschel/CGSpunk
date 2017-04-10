@@ -20,7 +20,7 @@ gulp.task('extras', () => {
     'app/bower_components/bootstrap/dist/fonts/**',
     'app/bower_components/font-awesome/css/font-awesome.min.css',
     'app/bower_components/font-awesome/fonts/**',
-    'app/bower_components/jquery/dist/jquery.min.js',
+    'app/downloaded_libs/jquery/jquery.min.js',
     'app/scripts/*.js'
   ];
   if (isEdge) {
