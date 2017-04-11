@@ -11,10 +11,15 @@
         let data = event.data;
         if (data.action === 'removeEventListeners') {
             window.removeEventListener('message', onMessage, false);
+            dom.unhookPlayButtons(actions.onPlay);
         } else if (data.action === 'multiplayerIdeLoadedEvent') {
             onMultiplayerIdeLoaded();
         }
     }
+
+    $(document).ready(() => {
+        dom.hookPlayButtons(actions.onPlay);
+    });
 
     function onMultiplayerIdeLoaded() {
         dom.createSwapButton(actions.rotateAgents);

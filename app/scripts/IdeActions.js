@@ -56,6 +56,10 @@ var IdeActions =
         return sendMessageToInjectedScript({action:'playMatch'});
     }
 
+    function waitForPlayMatch() {
+        return sendMessageToInjectedScript({action:'waitForPlayMatch'});
+    }
+
     function getAgentsData() {
         return sendMessageToInjectedScript({action:'getAgentsData'});
     }
@@ -196,6 +200,49 @@ var IdeActions =
         }
     });
 
+    function onPlay() {
+        setTimeout(() => {
+            chrome.storage.sync.get({
+                showLogOnMultiPlay: true
+            }, items => {
+                if (items.showLogOnMultiPlay) {
+                    doOnPlay();
+                }
+            });
+        }, 200);
+    }
+
+    function doOnPlay() {
+        waitForPlayMatch()
+            .then(result => {
+                if (!result.didPlay) {
+                    return;
+                }
+
+                debounceGetResultsOfPlay();
+            });
+    }
+
+    var g_debounceAlreadyGettingResults = false;
+    function debounceGetResultsOfPlay() {
+        if (g_debounceAlreadyGettingResults) {
+            return;
+        }
+        g_debounceAlreadyGettingResults = true;
+        setTimeout(() => {
+            g_debounceAlreadyGettingResults = false;
+            getResultsOfMatch()
+                .then(showLogWindowForMatch);
+        }, 200);
+    }
+
+    function showLogWindowForMatch(results) {
+        chrome.runtime.sendMessage({
+            action: 'showMatchGameLog',
+            gameLog: results.history
+        });
+    }
+
     return new function() {
         let actions = this;
 
@@ -215,5 +262,6 @@ var IdeActions =
         actions.getGameScores = getGameScores;
         actions.getGameEndState = getGameEndState;
         actions.getResultsOfMatch = getResultsOfMatch;
+        actions.onPlay = onPlay;
     };
 })(BatchRunOptions, BatchRunner, MatchGenerator);

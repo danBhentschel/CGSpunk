@@ -102,7 +102,28 @@ var IdeDomManipulator =
     function getNumPlayerSlots() {
         return new Promise(resolve => resolve($('.agent').length));
     }
-    
+
+    //public
+    function hookPlayButtons(callback) {
+        return new Promise(resolve => {
+            $(document).on('click', '.play', callback);
+            $(document).on('click', '.play > span', callback);
+            $(document).on('click', '.replay', callback);
+            $(document).on('click', '.replay > span', callback);
+            resolve();
+        });
+    }
+
+    //public
+    function unhookPlayButtons(callback) {
+        return new Promise(resolve => {
+            $(document).off('click', '.play', callback);
+            $(document).off('click', '.play > span', callback);
+            $(document).off('click', '.replay', callback);
+            $(document).off('click', '.replay > span', callback);
+            resolve();
+        });
+    }
 
     // ***************** All private after here ****************
 
@@ -134,6 +155,8 @@ var IdeDomManipulator =
         manipulator.buttonStopping = buttonStopping;
         manipulator.buttonStop = buttonStop;
         manipulator.removeButtons = removeButtons;
+        manipulator.hookPlayButtons = hookPlayButtons;
+        manipulator.unhookPlayButtons = hookPlayButtons;
 
         // Batch methods
         manipulator.clickPlayButton = clickPlayButton;

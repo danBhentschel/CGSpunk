@@ -69,6 +69,9 @@ var __CGSpunk_Injected =
             case 'playMatch':
                 playMatch();
                 break;
+            case 'waitForPlayMatch':
+                waitForPlayMatch();
+                break;
             case 'stopPlayback':
                 stopPlayback();
                 break;
@@ -379,6 +382,16 @@ var __CGSpunk_Injected =
             .then(() => waitForPlayInProgress(true))
             .then(() => waitForPlayInProgress(false))
             .then(() => window.postMessage({action:'playMatchComplete'}, '*'));
+    }
+
+    function waitForPlayMatch() {
+        let didPlay = playIsInProgress();
+
+        waitForPlayInProgress(false)
+            .then(() => window.postMessage({
+                action: 'waitForPlayMatchComplete',
+                result: { didPlay: didPlay }
+            }, '*'));
     }
 
     function waitForPlayInProgress(value) {
