@@ -118,6 +118,24 @@
       expect(data[0].lines).toContain('Max rounds reached');
     });
 
+    it('should substitute player names in summary properly', function () {
+      let log = __CodebustersGameLog_1;
+      let data = __CGSpunk_matchGameLogDialog.__FOR_TEST_parseLog(log.data, log.agents, {
+        showLabels: false,
+        showStdin: false,
+        showStderr: false,
+        showStdout: false,
+        showSummary: true
+      });
+
+      expect(data.length).toBe(119);
+      expect(data[0].class).toBe('info');
+      expect(data[0].lines).toBe('Buster 0 of player player_one moves to (1159,2824)\n' +
+        'Buster 1 of player player_one moves to (2824,1159)\n' +
+        'Buster 2 of player Bosspectre moves to (15178,6259)\n' +
+        'Buster 3 of player Bosspectre moves to (13259,8178)');
+    });
+
   });
 
 })();

@@ -55,7 +55,7 @@ var __CGSpunk_matchGameLogDialog =
                 data = addStdoutData(data, agents, turn.stdout, options.showLabels);
             }
             if (options.showSummary) {
-                data = addSummaryData(data, turn.summary);
+                data = addSummaryData(data, agents, turn.summary);
             }
         }
 
@@ -143,7 +143,7 @@ var __CGSpunk_matchGameLogDialog =
         return data;
     }
 
-    function addSummaryData(data, summary) {
+    function addSummaryData(data, agents, summary) {
         if (!summary) {
             return data;
         }
