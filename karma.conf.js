@@ -20,7 +20,7 @@ module.exports = function(config) {
     files: [
       'test/data/*.js',
       'test/mock/*.js',
-      'app/bower_components/jquery/dist/jquery.min.js',
+      'app/downloaded_libs/jquery/jquery.min.js',
       'app/scripts/QueryStringHelper.js',
       'app/scripts/DomUtils.js',
       'app/scripts/IdeDomManipulator.js',

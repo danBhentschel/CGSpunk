@@ -1,10 +1,20 @@
 (function(dom, actions) {
     'use strict';
 
-    window.addEventListener('message', event => {
+    dom.removeButtons();
+
+    setTimeout(() => {
+        window.addEventListener('message', onMessage, false);
+    }, 100);
+
+    function onMessage(event) {
         let data = event.data;
-        if (data.action === 'multiplayerIdeLoadedEvent') onMultiplayerIdeLoaded();
-    }, false);
+        if (data.action === 'removeEventListeners') {
+            window.removeEventListener('message', onMessage, false);
+        } else if (data.action === 'multiplayerIdeLoadedEvent') {
+            onMultiplayerIdeLoaded();
+        }
+    }
 
     function onMultiplayerIdeLoaded() {
         dom.createSwapButton(actions.rotateAgents);

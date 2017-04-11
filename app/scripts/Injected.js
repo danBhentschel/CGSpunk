@@ -49,26 +49,67 @@ var __CGSpunk_Injected =
         }
     }
 
-    window.addEventListener('message', function(event) {
+    window.addEventListener('message', onMessage, false);
+
+    function onMessage(event) {
         let data = event.data;
-        if (data.action === 'rotateAgents') rotateAgents();
-        if (data.action === 'setGameOptionsManual') setGameOptionsManual(data.data);
-        if (data.action === 'setGameOptionsText') setGameOptionsText(data.data);
-        if (data.action === 'playMatch') playMatch();
-        if (data.action === 'stopPlayback') stopPlayback();
-        if (data.action === 'getAgentsData') getAgentsData();
-        if (data.action === 'sendToIde') sendToIde(data.data);
-        if (data.action === 'getAgentsAroundAgent') getAgentsAroundAgent(data.data);
-        if (data.action === 'getAgentsInRange') getAgentsInRange(data.data);
-        if (data.action === 'getCurrentUser') getCurrentUser();
-        if (data.action === 'getCurrentUserArenaAgent') getCurrentUserArenaAgent();
-        if (data.action === 'addAgent') addAgent(data.data);
-        if (data.action === 'addAgents') addAgents(data.data);
-        if (data.action === 'setPlaybackFrame') setPlaybackFrame(data.data);
-        if (data.action === 'getGameScores') getGameScores();
-        if (data.action === 'getGameEndState') getGameEndState();
-        if (data.action === 'getResultsOfMatch') getResultsOfMatch();
-    }, false);
+        switch (data.action) {
+            case 'removeEventListeners':
+                window.removeEventListener('message', onMessage, false);
+                break;
+            case 'rotateAgents':
+                rotateAgents();
+                break;
+            case 'setGameOptionsManual':
+                setGameOptionsManual(data.data);
+                break;
+            case 'setGameOptionsText':
+                setGameOptionsText(data.data);
+                break;
+            case 'playMatch':
+                playMatch();
+                break;
+            case 'stopPlayback':
+                stopPlayback();
+                break;
+            case 'getAgentsData':
+                getAgentsData();
+                break;
+            case 'sendToIde':
+                sendToIde(data.data);
+                break;
+            case 'getAgentsAroundAgent':
+                getAgentsAroundAgent(data.data);
+                break;
+            case 'getAgentsInRange':
+                getAgentsInRange(data.data);
+                break;
+            case 'getCurrentUser':
+                getCurrentUser();
+                break;
+            case 'getCurrentUserArenaAgent':
+                getCurrentUserArenaAgent();
+                break;
+            case 'addAgent':
+                addAgent(data.data);
+                break;
+            case 'addAgents':
+                addAgents(data.data);
+                break;
+            case 'setPlaybackFrame':
+                setPlaybackFrame(data.data);
+                break;
+            case 'getGameScores':
+                getGameScores();
+                break;
+            case 'getGameEndState':
+                getGameEndState();
+                break;
+            case 'getResultsOfMatch':
+                getResultsOfMatch();
+                break;
+        }
+    }
 
     function rotateAgents() {
         let names = angular.element('.agent').map(function() {

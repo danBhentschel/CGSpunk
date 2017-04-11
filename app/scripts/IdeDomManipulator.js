@@ -50,6 +50,13 @@ var IdeDomManipulator =
             });
     }
 
+    //public
+    function removeButtons() {
+        removeButton('cgspkSwapButton');
+        removeButton('cgspkBatchButton');
+        removeButton('cgspkStopButton');
+    }
+
     // public
     function toggleBatchButtons() {
         return new Promise(resolve => {
@@ -99,6 +106,13 @@ var IdeDomManipulator =
 
     // ***************** All private after here ****************
 
+    function removeButton(id) {
+        var swapButton = $(`#${id}`);
+        if (swapButton.length > 0) {
+            swapButton.remove();
+        }
+    }
+
     function getAgentsScrollPanel() {
         return new Promise(resolve => doGetAgentsScrollPanel(resolve));
     }
@@ -119,6 +133,7 @@ var IdeDomManipulator =
         manipulator.toggleBatchButtons = toggleBatchButtons;
         manipulator.buttonStopping = buttonStopping;
         manipulator.buttonStop = buttonStop;
+        manipulator.removeButtons = removeButtons;
 
         // Batch methods
         manipulator.clickPlayButton = clickPlayButton;
