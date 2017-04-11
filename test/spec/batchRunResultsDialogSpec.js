@@ -64,4 +64,26 @@
 
   });
 
+  describe('getAboveBelowStatsFromResults()', function () {
+
+      it('should return proper info for 4P Hypersonic', function () {
+          var results = __FourPlayerHypersonic_1;
+          var stats = __CGSpunk_batchRunResultsDialog.__FOR_TEST_getAboveBelowStatsFromResults(results);
+          expect(stats.ide.above.wins).toBe(2);
+          expect(stats.ide.above.losses).toBe(1);
+          expect(stats.ide.above.ties).toBe(0);
+          expect(stats.arena.above.wins).toBe(1);
+          expect(stats.arena.above.losses).toBe(1);
+          expect(stats.arena.above.ties).toBe(1);
+
+          expect(stats.ide.below.wins).toBe(6);
+          expect(stats.ide.below.losses).toBe(0);
+          expect(stats.ide.below.ties).toBe(0);
+          expect(stats.arena.below.wins).toBe(6);
+          expect(stats.arena.below.losses).toBe(0);
+          expect(stats.arena.below.ties).toBe(0);
+      });
+
+  });
+
 })();

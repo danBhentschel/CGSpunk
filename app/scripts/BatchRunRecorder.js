@@ -11,7 +11,8 @@ var BatchRunRecorder =
             swapEnabled: params.swapEnabled,
             arenaCodeEnabled: params.arenaCodeEnabled,
             numOpponents: params.numOpponents,
-            matches: []
+            matches: [],
+            arenaRank: params.arenaRank
         };
     }
 

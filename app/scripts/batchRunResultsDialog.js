@@ -93,6 +93,7 @@ var __CGSpunk_batchRunResultsDialog =
             $('#hdrIdeCode').show();
             $('#arenaRow').show();
             $('#hdrArenaCode').show();
+            $('#arenaAboveBelow').show();
         }
     }
     
@@ -290,6 +291,7 @@ var __CGSpunk_batchRunResultsDialog =
         addSwapSignificantRuns(results, matchInfos);
         addCodeSignificantRuns(results, matchInfos);
         addFailedMatches(results, matchInfos);
+        updateAboveBelowStats(results);
     
         let avgPosElement = $(avgPosId);
         if (avgPosElement.is(':visible'))
@@ -535,11 +537,77 @@ var __CGSpunk_batchRunResultsDialog =
         };
     }
 
+    function getAboveBelowStatsFromResults(results) {
+        let stats = {
+            ide: {
+                above: { wins: 0, losses: 0, ties: 0 },
+                below: { wins: 0, losses: 0, ties: 0 }
+            },
+            arena: {
+                above: { wins: 0, losses: 0, ties: 0 },
+                below: { wins: 0, losses: 0, ties: 0 }
+            }
+        };
+
+        let rank = results.arenaRank;
+
+        for (let i = 0; i < results.matches.length; i++) {
+            let match = results.matches[i];
+            let type = match.data.type;
+            let rankings = match.results.rankings;
+            let placement = rankings.filter(_ => _.name === results.userName)[0].rank;
+
+            for (let j = 0; j < rankings.length; j++) {
+                let ranking = rankings[j];
+                if (ranking.name === results.userName) {
+                    continue;
+                }
+                let agent = match.data.agents.filter(_ => _.agentId === ranking.agentId)[0];
+                let aboveBelow = agent.rank < rank ? 'above' : 'below';
+                if (ranking.rank < placement) {
+                    stats[type][aboveBelow].losses++;
+                } else if (ranking.rank > placement) {
+                    stats[type][aboveBelow].wins++;
+                } else {
+                    stats[type][aboveBelow].ties++;
+                }
+            }
+        }
+
+        return stats;
+    }
+
+    function updateAboveBelowStats(results) {
+        let stats = getAboveBelowStatsFromResults(results);
+
+        if (anyAboveBelow(stats.ide)) {
+            $('#ideAboveBelow').show();
+            $('#ideRankedAbove').text(aboveBelowString(stats.ide.above));
+            $('#ideRankedBelow').text(aboveBelowString(stats.ide.below));
+        }
+
+        if (anyAboveBelow(stats.arena)) {
+            $('#arenaAboveBelow').show();
+            $('#arenaRankedAbove').text(aboveBelowString(stats.arena.above));
+            $('#arenaRankedBelow').text(aboveBelowString(stats.arena.below));
+        }
+    }
+
+    function anyAboveBelow(stats) {
+        return (stats.above.wins + stats.above.losses + stats.above.ties +
+                stats.below.wins + stats.below.losses + stats.below.ties) > 0;
+    }
+
+    function aboveBelowString(stats) {
+        return `${stats.wins} / ${stats.losses} / ${stats.ties}`;
+    }
+
     return {
         __FOR_TEST_getListOfRunsWhereCodeVersionIsSignificant: getListOfRunsWhereCodeVersionIsSignificant,
         __FOR_TEST_getListOfRunsWhereStartPositionIsSignificant: getListOfRunsWhereStartPositionIsSignificant,
         __FOR_TEST_getListOfMatchesWithErrors: getListOfMatchesWithErrors,
-        __FOR_TEST_getMatchInfosFromResults: getMatchInfosFromResults
+        __FOR_TEST_getMatchInfosFromResults: getMatchInfosFromResults,
+        __FOR_TEST_getAboveBelowStatsFromResults: getAboveBelowStatsFromResults
     };
 
 })();

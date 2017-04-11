@@ -117,6 +117,9 @@ var IdeActions =
             .then(runData => addCurrentPlayersToRunData(runData, params))
             .then(runData => {
                 params.initialAgents = runData.currentPlayers;
+                if (!!runData.myAgents.arena) {
+                    params.arenaRank = runData.myAgents.arena.rank;
+                }
                 return runData;
             })
             .then(runData => generator.addMatchesToParams(runData, params));
