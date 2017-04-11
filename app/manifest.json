@@ -54,6 +54,10 @@
     "web_accessible_resources": [
         "scripts/Injected.js"
     ],
+    "options_ui": {
+        "page": "dialogs/options.html",
+        "chrome_style": true
+    },
     "-ms-preload": {
         "backgroundScript": "backgroundScriptsAPIBridge.js",
         "contentScript": "contentScriptsAPIBridge.js"
