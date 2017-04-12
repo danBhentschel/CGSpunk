@@ -238,7 +238,7 @@ var IdeActions =
 
     function showLogWindowForMatch(results) {
         chrome.runtime.sendMessage({
-            action: 'showMatchGameLog',
+            action: 'showLiveMatchGameLog',
             gameLog: results.history
         });
     }

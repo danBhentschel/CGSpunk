@@ -16,19 +16,19 @@
 
     <div class="row">
         <div class="btn-group" data-toggle="buttons" id="selections">
-          <label class="btn btn-primary active">
+          <label class="btn btn-primary active" id="lblLabels">
             <input type="checkbox" id="labels" autocomplete="off" checked> Labels
           </label>
-          <label class="btn btn-success active" data-toggle="tooltip" title="To get stdin, log the inputs to stderr between two lines: 'IN' and '/IN'">
+          <label class="btn btn-success active" id="lblStdin" data-toggle="tooltip" title="To get stdin, log the inputs to stderr between two lines: 'IN' and '/IN'">
             <input type="checkbox" id="stdin" autocomplete="off" checked> stdin
           </label>
-          <label class="btn btn-danger active">
+          <label class="btn btn-danger active" id="lblStderr">
             <input type="checkbox" id="stderr" autocomplete="off" checked> stderr
           </label>
-          <label class="btn btn-warning active">
+          <label class="btn btn-warning active" id="lblStdout">
             <input type="checkbox" id="stdout" autocomplete="off" checked> stdout
           </label>
-          <label class="btn btn-info active">
+          <label class="btn btn-info active" id="lblSummary">
             <input type="checkbox" id="summary" autocomplete="off" checked> Summary
           </label>
         </div>

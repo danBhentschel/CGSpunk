@@ -13,13 +13,15 @@
         } else if (request.action === 'showResultsWindow') {
             showResultsWindow(request.instanceNum, sender.tab.id);
         } else if (request.action === 'showMatchGameLog') {
-            showGameLogWindow(request.gameLog);
+            showGameLogWindow(request.gameLog, sender.tab.id);
+        } else if (request.action === 'showLiveMatchGameLog') {
+            showLiveGameLogWindow(request.gameLog, sender.tab.id);
         } else if (request.action === 'showMatchCrashInfo') {
             showCrashInfoWindow(request.crashInfo);
         } else if (request.action === 'showBatchData') {
             showBatchDataWindow(request.data);
         } else if (request.action === 'getLastGameLog') {
-            sendResponse(g_lastGameLog);
+            sendResponse({ log: g_lastGameLog, params: g_lastGameLogParams });
         } else if (request.action === 'getLastCrashInfo') {
             sendResponse(g_lastCrashInfo);
         } else if (request.action === 'getLastBatchData') {
@@ -47,14 +49,49 @@
     }
 
     var g_lastGameLog;
+    var g_lastGameLogParams;
 
-    function showGameLogWindow(gameLog) {
+    function showGameLogWindow(gameLog, params) {
         g_lastGameLog = gameLog;
-        chrome.windows.create({
+        g_lastGameLogParams = params;
+
+        let windowParams = {
             url: 'dialogs/matchGameLog.html',
             type: 'popup',
             width: 600,
             height: 600
+        };
+
+        if (!!params && !!params.rect) {
+            windowParams.width = params.rect.width;
+            windowParams.height = params.rect.height;
+            if (!!params.rect.x && !!params.rect.y) {
+                windowParams.left = params.rect.x;
+                windowParams.top = params.rect.y;
+            }
+        }
+
+        chrome.windows.create(windowParams);
+    }
+
+    function showLiveGameLogWindow(gameLog, tabId) {
+        chrome.runtime.sendMessage({
+            action: 'updateMatchGameLog',
+            tabId: tabId,
+            log: gameLog
+        }, response => {
+            if (!response) {
+                chrome.storage.sync.get(
+                    { 'liveGameLogWindowPosition': { width: 600, height: 600 } },
+                    items => {
+                        let params = {
+                            tabId: tabId,
+                            isLive: true,
+                            rect: items.liveGameLogWindowPosition
+                        };
+                        showGameLogWindow(gameLog, params);
+                    });
+            }
         });
     }
 

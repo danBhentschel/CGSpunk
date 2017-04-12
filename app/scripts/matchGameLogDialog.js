@@ -3,29 +3,102 @@ var __CGSpunk_matchGameLogDialog =
     'use strict';
 
     var g_gameLog;
+    var g_tabId;
 
     $(document).ready(() => {
-        chrome.runtime.sendMessage({ action: 'getLastGameLog' }, gameLog => {
-            g_gameLog = gameLog;
-            showLogData();
+        chrome.runtime.sendMessage({ action: 'getLastGameLog' }, response => {
+            g_gameLog = response.log;
+            if (!!response.params) {
+                g_tabId = response.params.tabId;
+                g_tabId = response.params.tabId;
+                if (response.params.isLive) {
+                    setInterval(savePosition, 500);
+                }
+            }
+            chrome.storage.sync.get({ 'gameLogOptions': null }, items => {
+                let options = items.gameLogOptions;
+                if (!!options) {
+                    if (!options.showLabels) {
+                        disableOption('#labels', '#lblLabels');
+                    }
+                    if (!options.showStdin) {
+                        disableOption('#stdin', '#lblStdin');
+                    }
+                    if (!options.showStdout) {
+                        disableOption('#stdout', '#lblStdout');
+                    }
+                    if (!options.showStderr) {
+                        disableOption('#stderr', '#lblStderr');
+                    }
+                    if (!options.showSummary) {
+                        disableOption('#summary', '#lblSummary');
+                    }
+                }
+                showLogData();
+
+                $('#selections').on('change', ':checkbox', function() {
+                    showLogData();
+                });
+            });
             $('#stdin').tooltip({ trigger: 'hover' });
         });
-
-        $('#selections').on('change', ':checkbox', function() {
-            showLogData();
-        });
     });
+
+    function disableOption(input, label) {
+        $(input).prop('checked', false);
+        $(label).removeClass('active');
+    }
+
+    chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+        if (request.action === 'updateMatchGameLog' && request.tabId === g_tabId) {
+            chrome.storage.sync.get({ 'liveGameLogWindowBehavior': 'reload' }, items => {
+                if (items.liveGameLogWindowBehavior === 'reload') {
+                    window.close();
+                    return false;
+                }
+                g_gameLog = request.log;
+                showLogData();
+                sendResponse('success');
+            });
+            return true;
+        }
+    });
+
+    var savedPos = {
+        x: window.screenX,
+        y: window.screenY,
+        width: window.outerWidth,
+        height: window.outerHeight
+    };
+
+    function savePosition() {
+        let pos = {
+            x: window.screenX,
+            y: window.screenY,
+            width: window.outerWidth,
+            height: window.outerHeight
+        };
+        if (savedPos.x !== pos.x || savedPos.y !== pos.y ||
+                savedPos.width !== pos.width || savedPos.height != pos.height) {
+            chrome.storage.sync.set({ 'liveGameLogWindowPosition': pos });
+            savedPos = pos;
+        }
+    }
 
     function showLogData() {
         let agents = g_gameLog.agents;
 
-        let data = parseLog(g_gameLog.data, g_gameLog.agents, {
+        let options = {
             showLabels: $('#labels').is(':checked'),
             showStdin: $('#stdin').is(':checked'),
             showStderr: $('#stderr').is(':checked'),
             showStdout: $('#stdout').is(':checked'),
             showSummary: $('#summary').is(':checked')
-        });
+        };
+
+        chrome.storage.sync.set({ 'gameLogOptions': options });
+
+        let data = parseLog(g_gameLog.data, g_gameLog.agents, options);
 
         $('#gameLog').html(data.map(entry => {
             return `<span class="text-${entry.class}">${entry.lines}</span>`;
