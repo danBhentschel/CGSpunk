@@ -158,13 +158,16 @@ var __CGSpunk_matchGameLogDialog =
         return data;
     }
 
+    var stdinRegex = /IN\n([\s\S]*?)\/IN(?:$|\n)+/;
+    var stdinRegex_g = new RegExp(stdinRegex.source, "g");
+
     function getStdinFromStderr(stderr) {
         if (!stderr) {
             return null;
         }
-        let stdin = stderr.match(/IN\n[\s\S]*?\/IN\n/g);
+        let stdin = stderr.match(stdinRegex_g);
         if (!!stdin) {
-            stdin = stdin.map(_ => _.match(/IN\n([\s\S]*)\/IN\n/)[1]).join('').trim();
+            stdin = stdin.map(_ => _.match(stdinRegex)[1]).join('').trim();
         }
         return stdin;
     }
@@ -174,11 +177,13 @@ var __CGSpunk_matchGameLogDialog =
             return data;
         }
 
-        let onlyStderr = stderr.replace(/IN\n[\s\S]*?\/IN\n/g, '').trim();
-        data.push({
-            class: 'danger',
-            lines: onlyStderr
-        });
+        let onlyStderr = stderr.replace(stdinRegex_g, '').trim();
+        if (!!onlyStderr) {
+            data.push({
+                class: 'danger',
+                lines: onlyStderr
+            });
+        }
 
         return data;
     }
