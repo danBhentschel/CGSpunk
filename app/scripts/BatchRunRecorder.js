@@ -39,7 +39,6 @@ var BatchRunRecorder =
         let lastDestination = '';
         for (let i = 0; i < data.length; i++) {
             let thisMove = data[i].stdout[idx];
-            if (thisMove.startsWith('WAIT')) { continue; }
             if (thisMove.startsWith('GOTO')) {
                 let destination = thisMove.split(' ')[1];
                 if (!!lastDestination && destination != lastDestination) {
@@ -47,7 +46,7 @@ var BatchRunRecorder =
                 }
 
                 lastDestination = destination;
-            } else {
+            } else if (thisMove.startsWith('CONNECT')) {
                 lastDestination = '';
             }
         }
