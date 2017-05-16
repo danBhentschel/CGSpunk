@@ -159,7 +159,7 @@ var __CGSpunk_matchGameLogDialog =
     }
 
     var stdinRegex = /IN\n([\s\S]*?)\/IN(?:$|\n)+/;
-    var stdinRegex_g = new RegExp(stdinRegex.source, "g");
+    var stdinRegex_g = new RegExp(stdinRegex.source, 'g');
 
     function getStdinFromStderr(stderr) {
         if (!stderr) {
