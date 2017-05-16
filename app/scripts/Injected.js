@@ -217,6 +217,7 @@ var __CGSpunk_Injected =
                 if (gameName === 'Hypersonic') scores = getGameScoresForHypersonic(gameManager);
                 else if (gameName === 'Fantastic Bits') scores = getGameScoresForFantasticBits(gameManager);
                 else if (gameName === 'CodeBusters') scores = getGameScoresForCodeBusters(gameManager);
+                else if (gameName === 'Roche') scores = getGameScoresForCode4Life(gameManager);
                 return scores;
             })
             .then(scores => window.postMessage({action:'getGameScoresComplete', result: scores}, '*'));
@@ -265,6 +266,18 @@ var __CGSpunk_Injected =
             score: _.score >= 0 ? _.score : 0,
             max: numGhosts
         }; });
+    }
+
+    function getGameScoresForCode4Life(gameManager) {
+        let frames = gameManager.drawer.drawer.frames;
+        let lastFrameData = frames[frames.length-1].players;
+        return gameManager.agents.map((_, i) => { 
+            return {
+                name: _.name,
+                agentId: _.agentId,
+                score: lastFrameData[i].score
+            };
+        });
     }
 
     function getGameEndState() {
@@ -570,6 +583,7 @@ var __CGSpunk_Injected =
 
     function getResults(gameManager) {
         return {
+            gameName: gameManager.drawer.drawer.question,
             rankings: rankingsForAgents(gameManager.agents),
             options: getMatchOptions(),
             history: getGameHistoryFromGameManager(gameManager),
