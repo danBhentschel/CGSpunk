@@ -51,18 +51,20 @@ var __CGSpunk_matchGameLogDialog =
 
     chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         if (request.action === 'updateMatchGameLog' && request.tabId === g_tabId) {
-            chrome.storage.sync.get({ 'liveGameLogWindowBehavior': 'reload' }, items => {
+            chrome.storage.sync.get({ 'liveGameLogWindowBehavior': 'focus' }, items => {
                 if (items.liveGameLogWindowBehavior === 'reload') {
                     window.close();
-                    return false;
+                    sendResponse('reload');
+                } else {
+                    g_gameLog = request.log;
+                    showLogData();
+                    sendResponse('focus');
                 }
-                g_gameLog = request.log;
-                showLogData();
-                sendResponse('success');
             });
             return true;
         }
     });
+
 
     var savedPos = {
         x: window.screenX,
