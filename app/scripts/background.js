@@ -50,6 +50,7 @@
 
     var g_lastGameLog;
     var g_lastGameLogParams;
+    var g_liveGameLogWindowId;
 
     function showGameLogWindow(gameLog, params) {
         g_lastGameLog = gameLog;
@@ -71,7 +72,11 @@
             }
         }
 
-        chrome.windows.create(windowParams);
+        chrome.windows.create(windowParams, createdWindow => {
+            // Firefox doesn't seem to position it correctly on creation
+            chrome.windows.update(createdWindow.id, {left: windowParams.left, top: windowParams.top});
+            if (params.isLive) g_liveGameLogWindowId = createdWindow.id;
+        });
     }
 
     function showLiveGameLogWindow(gameLog, tabId) {
@@ -80,7 +85,7 @@
             tabId: tabId,
             log: gameLog
         }, response => {
-            if (!response) {
+            if (!response || response === 'reload') {
                 chrome.storage.sync.get(
                     { 'liveGameLogWindowPosition': { width: 600, height: 600 } },
                     items => {
@@ -91,6 +96,9 @@
                         };
                         showGameLogWindow(gameLog, params);
                     });
+            }
+            else if (response === 'focus') {
+                chrome.windows.update(g_liveGameLogWindowId, {focused: true});
             }
         });
     }
