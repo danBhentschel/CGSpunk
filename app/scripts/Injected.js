@@ -217,7 +217,8 @@ var __CGSpunk_Injected =
                 if (gameName === 'Hypersonic') scores = getGameScoresForHypersonic(gameManager);
                 else if (gameName === 'Fantastic Bits') scores = getGameScoresForFantasticBits(gameManager);
                 else if (gameName === 'CodeBusters') scores = getGameScoresForCodeBusters(gameManager);
-                else if (gameName === 'Roche') scores = getGameScoresForCode4Life(gameManager);
+                else if (gameName === 'Roche') scores = getGameScoresForCode4LifeLikeGame(gameManager);
+                else if (gameName === 'WondevWoman') scores = getGameScoresForCode4LifeLikeGame(gameManager);
                 return scores;
             })
             .then(scores => window.postMessage({action:'getGameScoresComplete', result: scores}, '*'));
@@ -268,7 +269,7 @@ var __CGSpunk_Injected =
         }; });
     }
 
-    function getGameScoresForCode4Life(gameManager) {
+    function getGameScoresForCode4LifeLikeGame(gameManager) {
         let frames = gameManager.drawer.drawer.frames;
         let lastFrameData = frames[frames.length-1].players;
         return gameManager.agents.map((_, i) => { 
