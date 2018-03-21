@@ -212,7 +212,7 @@ var __CGSpunk_Injected =
     function getGameScores() {
         waitForGameManager()
             .then(gameManager => {
-                var gameName = gameManager.drawer.drawer.question;
+                var gameName = gameManager.gameName;
                 var scores = null;
                 if (gameName === 'Hypersonic') scores = getGameScoresForHypersonic(gameManager);
                 else if (gameName === 'Fantastic Bits') scores = getGameScoresForFantasticBits(gameManager);
@@ -227,7 +227,7 @@ var __CGSpunk_Injected =
     function getGameScoresForHypersonic(gameManager) {
         let drawer = gameManager.drawer.drawer;
         let numBoxes = drawer.initData.boxes.length;
-        let agentIds = gameManager.agents.map(_ => _.agentId);
+        let agentIds = gameManager.currentGameInfo.agents.map(_ => _.agentId);
         return drawer.scope.playerInfo.map(_ => { return {
             name: _.name,
             agentId: agentIds[_.index],
@@ -238,8 +238,8 @@ var __CGSpunk_Injected =
 
     function getGameScoresForFantasticBits(gameManager) {
         let index = 5;
-        let agentNames = gameManager.agents.map(_ => _.name);
-        let agentIds = gameManager.agents.map(_ => _.agentId);
+        let agentNames = gameManager.currentGameInfo.agents.map(_ => _.name);
+        let agentIds = gameManager.currentGameInfo.agents.map(_ => _.agentId);
         let lastFrameData = gameManager.views[gameManager.views.length-1].split('\n');
         index += 1 + parseInt(lastFrameData[index], 10);
         let numSnaffles = parseInt(lastFrameData[index], 10);
@@ -260,7 +260,7 @@ var __CGSpunk_Injected =
     function getGameScoresForCodeBusters(gameManager) {
         let drawer = gameManager.drawer.drawer;
         let numGhosts = parseInt(drawer.initData.ghostCount, 10);
-        let agentIds = gameManager.agents.map(_ => _.agentId);
+        let agentIds = gameManager.currentGameInfo.agents.map(_ => _.agentId);
         return drawer.scope.playerInfo.map(_ => { return {
             name: _.name,
             agentId: agentIds[_.index],
@@ -272,7 +272,7 @@ var __CGSpunk_Injected =
     function getGameScoresForCode4LifeLikeGame(gameManager) {
         let frames = gameManager.drawer.drawer.frames;
         let lastFrameData = frames[frames.length-1].players;
-        return gameManager.agents.map((_, i) => { 
+        return gameManager.currentGameInfo.agents.map((_, i) => { 
             return {
                 name: _.name,
                 agentId: _.agentId,
@@ -290,7 +290,7 @@ var __CGSpunk_Injected =
     function getMyStateFromGameManager(gameManager, me) {
         let myAgent = getMyAgentFromGameManager(gameManager, me);
         if (!myAgent) return 'normal';
-        let myFrames = gameManager.frames.filter(_ => _.agentId == myAgent.index);
+        let myFrames = gameManager.currentGameInfo.frames.filter(_ => _.agentId == myAgent.index);
         let info = myFrames[myFrames.length-1].gameInformation;
         if (info.includes('nvalid input')) return 'invalid';
         if (info.includes('Timeout:')) return 'timeout';
@@ -298,7 +298,9 @@ var __CGSpunk_Injected =
     }
 
     function getMyAgentFromGameManager(gameManager, me) {
-        let myAgents = gameManager.agents.filter(_ => _.name === me);
+        let myAgents = gameManager.currentGameInfo.agents.filter(_ => _.typeData.me === true);
+        console.log(`myAgents`);
+
         if (myAgents.length === 0) return null;
         if (myAgents.length === 1) return myAgents[0];
         let ideAgents = myAgents.filter(_ => _.agentId === -1);
@@ -307,8 +309,8 @@ var __CGSpunk_Injected =
     }
 
     function getGameHistoryFromGameManager(gameManager) {
-        let agentNames = gameManager.agents.map(_ => getNameOfAgent(_));
-        let frames = gameManager.frames;
+        let agentNames = gameManager.currentGameInfo.agents.map(_ => getNameOfAgent(_));
+        let frames = gameManager.currentGameInfo.frames;
         let history = {
             agents: agentNames,
             data: []
@@ -349,13 +351,15 @@ var __CGSpunk_Injected =
     }
 
     function doWaitForGameManager(resolve) {
+	/*
         if (!(angular.element('.player')) ||
             !(angular.element('.player').scope()) ||
             !(angular.element('.player').scope().gameManager)) {
-
+	*/
+        if (!(angular.element('cg-player-sandbox').parent().scope().api.gameManagerAdapter)) { 
             setTimeout(() => doWaitForGameManager(resolve), 100);
         } else {
-            resolve(angular.element('.player').scope().gameManager);
+            resolve(angular.element('cg-player-sandbox').parent().scope().api.gameManagerAdapter);
         }
     }
 
@@ -443,7 +447,6 @@ var __CGSpunk_Injected =
     function getNameOfAgent(agent) {
         if (agent.codingamer) return agent.codingamer.pseudo;
         if (agent.arenaboss) return agent.arenaboss.nickname;
-        if (!!agent.name) return agent.name;
         return 'Default';
     }
 
@@ -584,8 +587,8 @@ var __CGSpunk_Injected =
 
     function getResults(gameManager) {
         return {
-            gameName: gameManager.drawer.drawer.question,
-            rankings: rankingsForAgents(gameManager.agents),
+            gameName: gameManager.gameName, 
+            rankings: rankingsForAgents(gameManager.currentGameInfo.agents),
             options: getMatchOptions(),
             history: getGameHistoryFromGameManager(gameManager),
             crash: getCrashInfo(),
@@ -596,7 +599,7 @@ var __CGSpunk_Injected =
     function rankingsForAgents(agents) {
         return agents.map(agent => {
             return {
-                name: agent.name,
+                name: getNameOfAgent(agent),
                 rank: agent.rank,
                 agentId: agent.agentId
             };
@@ -616,8 +619,12 @@ var __CGSpunk_Injected =
     }
 
     function getReplayUrl() {
+	// SixK : Temporary fix, need to comeback here later to be able to replay match
+	let href = 'http://www.codingame.com/replay/';
+	/*
         let href = $('.replay-button').attr('href');
 	    if (href.startsWith('/replay')) href = 'http://www.codingame.com' + href;
+	*/
 	    return href;
     }
 
