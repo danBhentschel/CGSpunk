@@ -588,7 +588,7 @@ var __CGSpunk_Injected =
             options: getMatchOptions(),
             history: getGameHistoryFromGameManager(gameManager),
             crash: getCrashInfo(),
-            replay: getReplayUrl()
+            replay: getReplayUrl(gameManager)
         };
     }
 
@@ -614,13 +614,8 @@ var __CGSpunk_Injected =
         return info;
     }
 
-    function getReplayUrl() {
-	// SixK : Temporary fix, need to comeback here later to be able to replay match
-	let href = 'http://www.codingame.com/replay/';
-	/*
-        let href = $('.replay-button').attr('href');
-	    if (href.startsWith('/replay')) href = 'http://www.codingame.com' + href;
-	*/
+    function getReplayUrl(gameManager) {
+	let href = 'http://www.codingame.com/replay/'+gameManager.currentGameInfo.gameId;
 	    return href;
     }
 
