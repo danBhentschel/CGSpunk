@@ -237,17 +237,13 @@ var __CGSpunk_Injected =
     }
 
     function getGameScoresForFantasticBits(gameManager) {
-        let agentNames = gameManager.currentGameInfo.agents.map(_ => _.name);
-        let agentIds = gameManager.currentGameInfo.agents.map(_ => _.agentId);
-        let lastFrameData = gameManager.currentGameInfo.frames[0].view.split('\n');
-        let numSnaffles = parseInt(lastFrameData[11], 10);
-        let scores = gameManager.currentGameInfo.scores;
-        return agentNames.map((_, i) => { 
-            var score = parseInt(scores[i], 10);
+        let firstFrameData = gameManager.currentGameInfo.frames[0].view.split('\n');
+        let numSnaffles = parseInt(firstFrameData[11], 10);
+        return gameManager.currentGameInfo.agents.map(_ => { 
             return {
-                name: _,
-                agentId: agentIds[i],
-                score: score >= 0 ? score : 0,
+                name: _.name,
+                agentId: _.agentId,
+                score: _.score >= 0 ? _.score : 0,
                 max: numSnaffles
             };
         });
