@@ -262,13 +262,11 @@ var __CGSpunk_Injected =
     }
 
     function getGameScoresForCode4LifeLikeGame(gameManager) {
-        let frames = gameManager.drawer.drawer.frames;
-        let lastFrameData = frames[frames.length-1].players;
-        return gameManager.currentGameInfo.agents.map((_, i) => { 
+        return gameManager.currentGameInfo.agents.map(_ => { 
             return {
                 name: _.name,
                 agentId: _.agentId,
-                score: lastFrameData[i].score
+                score: _.score
             };
         });
     }
