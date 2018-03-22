@@ -250,12 +250,12 @@ var __CGSpunk_Injected =
     }
 
     function getGameScoresForCodeBusters(gameManager) {
-        let drawer = gameManager.drawer.drawer;
-        let numGhosts = parseInt(drawer.initData.ghostCount, 10);
-        let agentIds = gameManager.currentGameInfo.agents.map(_ => _.agentId);
-        return drawer.scope.playerInfo.map(_ => { return {
+        let firstFrameData=gameManager.currentGameInfo.frames[0].view.split('\n');
+	let gameValues=firstFrameData[3].split(' ')
+        let numGhosts = parseInt(gameValues[4], 10);
+        return gameManager.currentGameInfo.agents.map(_ => { return {
             name: _.name,
-            agentId: agentIds[_.index],
+            agentId: _.agentId,
             score: _.score >= 0 ? _.score : 0,
             max: numGhosts
         }; });
