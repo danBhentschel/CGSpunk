@@ -346,7 +346,12 @@ var __CGSpunk_Injected =
             !(angular.element('.player').scope()) ||
             !(angular.element('.player').scope().gameManager)) {
 	*/
-        if (!(angular.element('cg-player-sandbox').parent().scope().api.gameManagerAdapter)) { 
+	// SixK : We want to be sure typeData is not undefined, probably calculated after receiving all other data
+        if (!(angular.element('cg-player-sandbox').parent().scope().api.gameManagerAdapter) ||
+            !(angular.element('cg-player-sandbox').parent().scope().api.gameManagerAdapter.currentGameInfo) ||
+            !(angular.element('cg-player-sandbox').parent().scope().api.gameManagerAdapter.currentGameInfo.agents[0]) ||
+            !(angular.element('cg-player-sandbox').parent().scope().api.gameManagerAdapter.currentGameInfo.agents[0].typeData) ||  
+	    !(angular.element('cg-player-sandbox').parent().scope().api.gameManagerAdapter.currentGameInfo.agents)) { 
             setTimeout(() => doWaitForGameManager(resolve), 100);
         } else {
             resolve(angular.element('cg-player-sandbox').parent().scope().api.gameManagerAdapter);
