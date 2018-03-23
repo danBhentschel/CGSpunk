@@ -289,8 +289,6 @@ var __CGSpunk_Injected =
 
     function getMyAgentFromGameManager(gameManager, me) {
         let myAgents = gameManager.currentGameInfo.agents.filter(_ => _.typeData.me === true);
-        console.log(`myAgents`);
-
         if (myAgents.length === 0) return null;
         if (myAgents.length === 1) return myAgents[0];
         let ideAgents = myAgents.filter(_ => _.agentId === -1);
