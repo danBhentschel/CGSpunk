@@ -141,7 +141,7 @@
     }
 
     function executeInAllTabs(scripts) {
-        chrome.tabs.getAllInWindow(null, tabs => {
+	chrome.tabs.query({ currentWindow: true}, tabs => {
             tabs.forEach(tab => {
                 scripts.forEach(script => {
                     chrome.tabs.executeScript(tab.id, { file: script }, () => {

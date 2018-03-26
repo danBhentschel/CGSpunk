@@ -212,7 +212,7 @@ var __CGSpunk_Injected =
     function getGameScores() {
         waitForGameManager()
             .then(gameManager => {
-                var gameName = gameManager.drawer.drawer.question;
+                var gameName = gameManager.gameName;
                 var scores = null;
                 if (gameName === 'Hypersonic') scores = getGameScoresForHypersonic(gameManager);
                 else if (gameName === 'Fantastic Bits') scores = getGameScoresForFantasticBits(gameManager);
@@ -225,10 +225,10 @@ var __CGSpunk_Injected =
     }
 
     function getGameScoresForHypersonic(gameManager) {
-        let drawer = gameManager.drawer.drawer;
-        let numBoxes = drawer.initData.boxes.length;
-        let agentIds = gameManager.agents.map(_ => _.agentId);
-        return drawer.scope.playerInfo.map(_ => { return {
+        let firstFrameData=gameManager.currentGameInfo.frames[0].view.split('\n');
+        let numBoxes = parseInt(firstFrameData[4], 10);
+        let agentIds = gameManager.currentGameInfo.agents.map(_ => _.agentId);
+        return gameManager.currentGameInfo.agents.map(_ => { return {
             name: _.name,
             agentId: agentIds[_.index],
             score: _.score % 100,
@@ -237,46 +237,36 @@ var __CGSpunk_Injected =
     }
 
     function getGameScoresForFantasticBits(gameManager) {
-        let index = 5;
-        let agentNames = gameManager.agents.map(_ => _.name);
-        let agentIds = gameManager.agents.map(_ => _.agentId);
-        let lastFrameData = gameManager.views[gameManager.views.length-1].split('\n');
-        index += 1 + parseInt(lastFrameData[index], 10);
-        let numSnaffles = parseInt(lastFrameData[index], 10);
-        index += 1 + numSnaffles;
-        index += 1 + parseInt(lastFrameData[index], 10);
-        let scores = lastFrameData[index].split(' ');
-        return agentNames.map((_, i) => { 
-            var score = parseInt(scores[i], 10);
+        let firstFrameData = gameManager.currentGameInfo.frames[0].view.split('\n');
+        let numSnaffles = parseInt(firstFrameData[11], 10);
+        return gameManager.currentGameInfo.agents.map(_ => { 
             return {
-                name: _,
-                agentId: agentIds[i],
-                score: score >= 0 ? score : 0,
+                name: _.name,
+                agentId: _.agentId,
+                score: _.score >= 0 ? _.score : 0,
                 max: numSnaffles
             };
         });
     }
 
     function getGameScoresForCodeBusters(gameManager) {
-        let drawer = gameManager.drawer.drawer;
-        let numGhosts = parseInt(drawer.initData.ghostCount, 10);
-        let agentIds = gameManager.agents.map(_ => _.agentId);
-        return drawer.scope.playerInfo.map(_ => { return {
+        let firstFrameData=gameManager.currentGameInfo.frames[0].view.split('\n');
+	let gameValues=firstFrameData[3].split(' ')
+        let numGhosts = parseInt(gameValues[4], 10);
+        return gameManager.currentGameInfo.agents.map(_ => { return {
             name: _.name,
-            agentId: agentIds[_.index],
+            agentId: _.agentId,
             score: _.score >= 0 ? _.score : 0,
             max: numGhosts
         }; });
     }
 
     function getGameScoresForCode4LifeLikeGame(gameManager) {
-        let frames = gameManager.drawer.drawer.frames;
-        let lastFrameData = frames[frames.length-1].players;
-        return gameManager.agents.map((_, i) => { 
+        return gameManager.currentGameInfo.agents.map(_ => { 
             return {
                 name: _.name,
                 agentId: _.agentId,
-                score: lastFrameData[i].score
+                score: _.score
             };
         });
     }
@@ -290,7 +280,7 @@ var __CGSpunk_Injected =
     function getMyStateFromGameManager(gameManager, me) {
         let myAgent = getMyAgentFromGameManager(gameManager, me);
         if (!myAgent) return 'normal';
-        let myFrames = gameManager.frames.filter(_ => _.agentId == myAgent.index);
+        let myFrames = gameManager.currentGameInfo.frames.filter(_ => _.agentId == myAgent.index);
         let info = myFrames[myFrames.length-1].gameInformation;
         if (info.includes('nvalid input')) return 'invalid';
         if (info.includes('Timeout:')) return 'timeout';
@@ -298,7 +288,7 @@ var __CGSpunk_Injected =
     }
 
     function getMyAgentFromGameManager(gameManager, me) {
-        let myAgents = gameManager.agents.filter(_ => _.name === me);
+        let myAgents = gameManager.currentGameInfo.agents.filter(_ => _.typeData.me === true);
         if (myAgents.length === 0) return null;
         if (myAgents.length === 1) return myAgents[0];
         let ideAgents = myAgents.filter(_ => _.agentId === -1);
@@ -307,8 +297,8 @@ var __CGSpunk_Injected =
     }
 
     function getGameHistoryFromGameManager(gameManager) {
-        let agentNames = gameManager.agents.map(_ => getNameOfAgent(_));
-        let frames = gameManager.frames;
+        let agentNames = gameManager.currentGameInfo.agents.map(_ => getNameOfAgent(_));
+        let frames = gameManager.currentGameInfo.frames;
         let history = {
             agents: agentNames,
             data: []
@@ -349,13 +339,24 @@ var __CGSpunk_Injected =
     }
 
     function doWaitForGameManager(resolve) {
+	/*
         if (!(angular.element('.player')) ||
             !(angular.element('.player').scope()) ||
             !(angular.element('.player').scope().gameManager)) {
-
+	*/
+	// SixK : We want to be sure typeData is not undefined, probably calculated after receiving all other data
+        if (!(angular.element('cg-player-sandbox')) ||
+            !(angular.element('cg-player-sandbox').parent()) ||
+            !(angular.element('cg-player-sandbox').parent().scope()) ||
+            !(angular.element('cg-player-sandbox').parent().scope().api) ||
+	    !(angular.element('cg-player-sandbox').parent().scope().api.gameManagerAdapter) ||
+            !(angular.element('cg-player-sandbox').parent().scope().api.gameManagerAdapter.currentGameInfo) ||
+            !(angular.element('cg-player-sandbox').parent().scope().api.gameManagerAdapter.currentGameInfo.agents[0]) ||
+            !(angular.element('cg-player-sandbox').parent().scope().api.gameManagerAdapter.currentGameInfo.agents[0].typeData) ||  
+	    !(angular.element('cg-player-sandbox').parent().scope().api.gameManagerAdapter.currentGameInfo.agents)) { 
             setTimeout(() => doWaitForGameManager(resolve), 100);
         } else {
-            resolve(angular.element('.player').scope().gameManager);
+            resolve(angular.element('cg-player-sandbox').parent().scope().api.gameManagerAdapter);
         }
     }
 
@@ -443,7 +444,6 @@ var __CGSpunk_Injected =
     function getNameOfAgent(agent) {
         if (agent.codingamer) return agent.codingamer.pseudo;
         if (agent.arenaboss) return agent.arenaboss.nickname;
-        if (!!agent.name) return agent.name;
         return 'Default';
     }
 
@@ -584,19 +584,19 @@ var __CGSpunk_Injected =
 
     function getResults(gameManager) {
         return {
-            gameName: gameManager.drawer.drawer.question,
-            rankings: rankingsForAgents(gameManager.agents),
+            gameName: gameManager.gameName, 
+            rankings: rankingsForAgents(gameManager.currentGameInfo.agents),
             options: getMatchOptions(),
             history: getGameHistoryFromGameManager(gameManager),
             crash: getCrashInfo(),
-            replay: getReplayUrl()
+            replay: getReplayUrl(gameManager)
         };
     }
 
     function rankingsForAgents(agents) {
         return agents.map(agent => {
             return {
-                name: agent.name,
+                name: getNameOfAgent(agent),
                 rank: agent.rank,
                 agentId: agent.agentId
             };
@@ -615,9 +615,8 @@ var __CGSpunk_Injected =
         return info;
     }
 
-    function getReplayUrl() {
-        let href = $('.replay-button').attr('href');
-	    if (href.startsWith('/replay')) href = 'http://www.codingame.com' + href;
+    function getReplayUrl(gameManager) {
+	let href = 'http://www.codingame.com/replay/'+gameManager.currentGameInfo.gameId;
 	    return href;
     }
 
