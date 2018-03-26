@@ -3,13 +3,12 @@ var __CGSpunk_Injected =
     'use strict';
 
     $(document).ready(() => {
-        angular.element('body').scope().$on('$routeChangeSuccess', (event, route) => {
-            let url = route['$$route']['templateUrl'];
-            //console.log(`routeChangeSuccess: ${url}`);
-            if (!url) return;
-            if (url.includes('modules/ide/')) {
+        angular.element('body').scope().$on('$locationChangeSuccess', (event, newUrl) => {
+            //console.log(`locationChangeSuccess: ${newUrl}`);
+            if (!newUrl) return;
+            if (newUrl.startsWith('https://www.codingame.com/ide/')) {
                 sendMultiplayerMessageWhenLoaded();
-            } else if (url.includes('modules/replay/')) {
+            } else if (newUrl.startsWith('https://www.codingame.com/replay/')) {
                 sendReplayMessageWhenLoaded();
             }
         });
